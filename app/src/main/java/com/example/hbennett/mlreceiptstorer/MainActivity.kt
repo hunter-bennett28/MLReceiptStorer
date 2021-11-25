@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.RecyclerView
 import com.example.hbennett.mlreceiptstorer.DB.DBAdapter
 import java.io.*
 import java.text.SimpleDateFormat
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     // Misc
     lateinit var currentPhotoPath: String;
     lateinit var photoURI: Uri;
+    lateinit var recyclerViewFolder: RecyclerView;
 
     //Database Related
     lateinit var folders: MutableList<Pair<Long, String>>; //Store the id and the folder name
