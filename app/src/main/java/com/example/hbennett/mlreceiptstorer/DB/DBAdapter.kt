@@ -95,7 +95,7 @@ class DBAdapter {
     /**
      * insertReceipt - Insert a Receipt with the folder id
      */
-    fun insertFolder(fid: Long, image: String?, total: Double?): Long {
+    fun insertReceipt(fid: Long, image: String?, total: Double?): Long {
         val initialValues = ContentValues()
         initialValues.put(DBContract.Receipt.COLUMN_NAME_FOLDER_ID, fid)
         initialValues.put(DBContract.Receipt.COLUMN_NAME_IMAGE, image)

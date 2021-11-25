@@ -11,7 +11,9 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hbennett.mlreceiptstorer.DB.DBAdapter
 import java.io.*
@@ -27,7 +29,11 @@ class MainActivity : AppCompatActivity() {
     // Misc
     lateinit var currentPhotoPath: String;
     lateinit var photoURI: Uri;
-    lateinit var recyclerViewFolder: RecyclerView;
+
+    //Folder RecyclerView
+    private lateinit var recyclerViewFolders: RecyclerView;
+    private lateinit var viewAdapter : RecyclerView.Adapter<*>;
+    private lateinit var viewManager : RecyclerView.LayoutManager;
 
     //Database Related
     lateinit var folders: MutableList<Pair<Long, String>>; //Store the id and the folder name
@@ -59,6 +65,17 @@ class MainActivity : AppCompatActivity() {
 
             //Load the current folders
             db.open()
+
+            //
+            //DEBUG DATA TO LOAD IN
+            // Dont worry about multiple entries every time you load, it will fail the
+            // insert if it already exists since folder name is a unique field
+
+            db.insertFolder("folder name", listOf<String>())
+            db.insertFolder("Another Demo Folder", listOf<String>())
+            db.insertFolder("This folder doesnt smell like ham...", listOf<String>())
+            db.insertFolder("Dennis the Dennist", listOf<String>())
+
             var c : Cursor? = db.getAllFolders();
 
             if (c!!.moveToFirst()) {
@@ -69,6 +86,16 @@ class MainActivity : AppCompatActivity() {
 
             db.close()
 
+            //Load recycler view from the folders
+            recyclerViewFolders = findViewById(R.id.recyclerViewFolders);
+            viewManager = LinearLayoutManager(this)
+            viewAdapter = FolderRecyclerAdapter(this, folders);
+
+            recyclerViewFolders = findViewById<RecyclerView>(R.id.recyclerViewFolders).apply {
+                setHasFixedSize(true)
+                layoutManager = viewManager
+                adapter = viewAdapter
+            }
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         } catch (e: IOException) {
@@ -88,6 +115,8 @@ class MainActivity : AppCompatActivity() {
         inputStream.close()
         outputStream.close()
     }
+
+// ****  Receipt Selection  ****
 
     fun onAddReceipt(view: View) {
         val builder = AlertDialog.Builder(this)
@@ -113,7 +142,11 @@ class MainActivity : AppCompatActivity() {
             // Check there's a camera activity to handle intent
             takePictureIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
-                val photoFile: File? = try { createImageFile() } catch (ex: IOException) { null }
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    null
+                }
                 photoFile?.also {
                     photoURI = FileProvider.getUriForFile(
                         this,
@@ -131,8 +164,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             launchReceiptActivity()
-        }
-        else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
+        } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
             photoURI = data!!.data!!;
             launchReceiptActivity()
         }

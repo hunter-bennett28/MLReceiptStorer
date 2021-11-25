@@ -8,13 +8,15 @@
         <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/activity_add_receipt.xml" value="0.36666666666666664" />
         <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/fragment_add_receipt_dialog.xml" value="0.20205128205128206" />
+        <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/activity_add_receipt.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/activity_folder.xml" value="0.25" />
         <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/recycler_view_folder_layout.xml" value="0.2015625" />
       </map>
     </option>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_X" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
