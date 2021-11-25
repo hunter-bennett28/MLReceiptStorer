@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.provider.BaseColumns
 import android.util.Log
+import java.lang.Exception
 
 class DBAdapter {
     companion object {
@@ -56,7 +57,11 @@ class DBAdapter {
                 DBAdapter.TAG, "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ", which will destroy all old data"
             )
-            db.execSQL("DROP TABLE IF EXISTS contacts")
+            db.execSQL(
+                "DROP TABLE IF EXISTS ${DBContract.Receipt.TABLE_NAME};" +
+                        "DROP TABLE IF EXISTS ${DBContract.BusinessPseudonym.TABLE_NAME};" +
+                        "DROP TABLE IF EXISTS ${DBContract.Folder.TABLE_NAME};"
+            )
             onCreate(db)
         }
     }
@@ -79,17 +84,28 @@ class DBAdapter {
     fun insertFolder(alias: String?, pseudonym: List<String>): Long {
         val initialValues = ContentValues()
         initialValues.put(DBContract.Folder.COLUMN_NAME_ALIAS, alias)
-        var fid = db!!.insert(DBContract.Folder.TABLE_NAME, null, initialValues)
+        var fid: Long = -1;
+        //Initialize transaction
+        try {
+            db!!.beginTransaction();
 
-        //Add each pseudonym to the pseudonym table
-        for(p in pseudonym){
-            val initialValues = ContentValues()
-            initialValues.put(DBContract.BusinessPseudonym.COLUMN_NAME_PSEUDONYM, p)
-            initialValues.put(DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID, fid)
-            db!!.insert(DBContract.BusinessPseudonym.TABLE_NAME, null, initialValues)
+            fid = db!!.insert(DBContract.Folder.TABLE_NAME, null, initialValues)
+
+            //Add each pseudonym to the pseudonym table
+            for (p in pseudonym) {
+                val initialValues = ContentValues()
+                initialValues.put(DBContract.BusinessPseudonym.COLUMN_NAME_PSEUDONYM, p)
+                initialValues.put(DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID, fid)
+                db!!.insert(DBContract.BusinessPseudonym.TABLE_NAME, null, initialValues)
+            }
+
+            db!!.setTransactionSuccessful();
+        } catch (e: Exception) {
+            e.printStackTrace();
+        } finally {
+            db!!.endTransaction();
+            return fid;
         }
-
-        return fid;
     }
 
     /**
@@ -108,21 +124,33 @@ class DBAdapter {
      * deleteFolder - deletes a folder, its receipts, and its pseudonyms from the DB by a folder row id
      */
     fun deleteFolder(rowId: Long): Boolean {
-        val res = db!!.delete(DBContract.Folder.TABLE_NAME, BaseColumns._ID + "=" + rowId, null) > 0
+        var res: Boolean = false;
 
-        if(res) { //A folder was deleted, we can delete each of its pseudonyms
-            db!!.delete(
-                DBContract.BusinessPseudonym.TABLE_NAME,
-                DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID + "=" + rowId,
-                null
-            )
-            db!!.delete(
-                DBContract.Receipt.TABLE_NAME,
-                DBContract.Receipt.COLUMN_NAME_FOLDER_ID + "=" + rowId,
-                null
-            )
+        try {
+            db!!.beginTransaction();
+
+            res = db!!.delete(DBContract.Folder.TABLE_NAME, BaseColumns._ID + "=" + rowId, null) > 0
+
+            if (res) { //A folder was deleted, we can delete each of its pseudonyms
+                db!!.delete(
+                    DBContract.BusinessPseudonym.TABLE_NAME,
+                    DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID + "=" + rowId,
+                    null
+                )
+                db!!.delete(
+                    DBContract.Receipt.TABLE_NAME,
+                    DBContract.Receipt.COLUMN_NAME_FOLDER_ID + "=" + rowId,
+                    null
+                )
+            }
+
+            db!!.setTransactionSuccessful();
+        } catch (e: Exception) {
+            e.printStackTrace();
+        } finally {
+            db!!.endTransaction();
+            return res;
         }
-        return res;
     }
 
     /**
@@ -147,14 +175,18 @@ class DBAdapter {
      *  getPseudonyms - Gets all pseudonyms for a specified folder id
      */
     fun getPseudonyms(rowId: Long): Cursor? {
-        return db!!.rawQuery("SELECT * FROM ${DBContract.BusinessPseudonym.TABLE_NAME} WHERE ${DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID} = ?", Array(1){"$rowId"})
+        return db!!.rawQuery(
+            "SELECT * FROM ${DBContract.BusinessPseudonym.TABLE_NAME} WHERE ${DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID} = ?",
+            Array(1) { "$rowId" })
     }
 
     /**
      *  getReceipts - Gets all receipts for a specified folder id
      */
     fun getReceipts(rowId: Long): Cursor? {
-        return db!!.rawQuery("SELECT * FROM ${DBContract.Receipt.TABLE_NAME} WHERE ${DBContract.Receipt.COLUMN_NAME_FOLDER_ID} = ?", Array(1){"$rowId"})
+        return db!!.rawQuery(
+            "SELECT * FROM ${DBContract.Receipt.TABLE_NAME} WHERE ${DBContract.Receipt.COLUMN_NAME_FOLDER_ID} = ?",
+            Array(1) { "$rowId" })
     }
 
     /**
