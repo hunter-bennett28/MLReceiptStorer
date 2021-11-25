@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">MLReceiptStorer</string>
+    <string name="addReceipt">Add A New Receipt</string>
+    <string name="plusSign">+</string>
+    <string name="selectReceiptPrompt">How would you like to add a new receipt?</string>
+    <string name="takePhoto">Take New</string>
+    <string name="selectPhoto">Choose Existing</string>
+    <string name="cancel">Cancel</string>
+    <string name="folder">Folder:</string>
+    <string name="total">Total:</string>
 </resources>
