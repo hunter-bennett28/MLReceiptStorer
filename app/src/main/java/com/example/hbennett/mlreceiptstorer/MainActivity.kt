@@ -7,12 +7,13 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 
 import android.content.DialogInterface
+import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
-import java.io.File
-import java.io.IOException
+import com.example.hbennett.mlreceiptstorer.DB.DBAdapter
+import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,9 +27,64 @@ class MainActivity : AppCompatActivity() {
     lateinit var currentPhotoPath: String;
     lateinit var photoURI: Uri;
 
+    //Database Related
+    lateinit var folders: MutableList<Pair<Long, String>>; //Store the id and the folder name
+    lateinit var db: DBAdapter;
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //Load the folders from the DB
+        db = DBAdapter(this)
+        //Initialize empty list
+        folders = mutableListOf<Pair<Long, String>>();
+
+        // get the existing database file or from the assets folder if doesn't exist
+        try {
+            //create a database if it doesnt exist already in the file path
+            val destPath = "data/data/$packageName/databases"
+            val f = File(destPath)
+            if (!f.exists()) {
+                f.mkdirs()
+                f.createNewFile()
+                //copy db from assets folder
+                CopyDB(
+                    baseContext.assets.open("mydb"),
+                    FileOutputStream("$destPath/MyDB")
+                )
+            }
+
+            //Load the current folders
+            db.open()
+            var c : Cursor? = db.getAllFolders();
+
+            if (c!!.moveToFirst()) {
+                do {
+                    folders.add(Pair<Long, String> (c.getLong(0), c.getString(1)));
+                } while (c.moveToNext())
+            }
+
+            db.close()
+
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    // copyDB to copy assets to phone
+    @Throws(IOException::class)
+    fun CopyDB(inputStream: InputStream, outputStream: OutputStream) {
+        //Copy one byte at a time
+        val buffer = ByteArray(1024)
+        var length: Int
+        while (inputStream.read(buffer).also { length = it } > 0) {
+            outputStream.write(buffer, 0, length)
+        }
+        inputStream.close()
+        outputStream.close()
     }
 
     fun onAddReceipt(view: View) {
