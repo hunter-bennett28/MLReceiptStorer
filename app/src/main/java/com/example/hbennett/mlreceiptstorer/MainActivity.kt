@@ -7,12 +7,16 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 
 import android.content.DialogInterface
+import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.core.content.FileProvider
-import java.io.File
-import java.io.IOException
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.hbennett.mlreceiptstorer.DB.DBAdapter
+import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,10 +30,93 @@ class MainActivity : AppCompatActivity() {
     lateinit var currentPhotoPath: String;
     lateinit var photoURI: Uri;
 
+    //Folder RecyclerView
+    private lateinit var recyclerViewFolders: RecyclerView;
+    private lateinit var viewAdapter : RecyclerView.Adapter<*>;
+    private lateinit var viewManager : RecyclerView.LayoutManager;
+
+    //Database Related
+    lateinit var folders: MutableList<Pair<Long, String>>; //Store the id and the folder name
+    lateinit var db: DBAdapter;
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //Load the folders from the DB
+        db = DBAdapter(this)
+        //Initialize empty list
+        folders = mutableListOf<Pair<Long, String>>();
+
+        // get the existing database file or from the assets folder if doesn't exist
+        try {
+            //create a database if it doesnt exist already in the file path
+            val destPath = "data/data/$packageName/databases"
+            val f = File(destPath)
+            if (!f.exists()) {
+                f.mkdirs()
+                f.createNewFile()
+                //copy db from assets folder
+                CopyDB(
+                    baseContext.assets.open("mydb"),
+                    FileOutputStream("$destPath/MyDB")
+                )
+            }
+
+            //Load the current folders
+            db.open()
+
+            //
+            //DEBUG DATA TO LOAD IN
+            // Dont worry about multiple entries every time you load, it will fail the
+            // insert if it already exists since folder name is a unique field
+
+            db.insertFolder("folder name", listOf<String>())
+            db.insertFolder("Another Demo Folder", listOf<String>())
+            db.insertFolder("This folder doesnt smell like ham...", listOf<String>())
+            db.insertFolder("Dennis the Dennist", listOf<String>())
+
+            var c : Cursor? = db.getAllFolders();
+
+            if (c!!.moveToFirst()) {
+                do {
+                    folders.add(Pair<Long, String> (c.getLong(0), c.getString(1)));
+                } while (c.moveToNext())
+            }
+
+            db.close()
+
+            //Load recycler view from the folders
+            recyclerViewFolders = findViewById(R.id.recyclerViewFolders);
+            viewManager = LinearLayoutManager(this)
+            viewAdapter = FolderRecyclerAdapter(this, folders);
+
+            recyclerViewFolders = findViewById<RecyclerView>(R.id.recyclerViewFolders).apply {
+                setHasFixedSize(true)
+                layoutManager = viewManager
+                adapter = viewAdapter
+            }
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
+
+    // copyDB to copy assets to phone
+    @Throws(IOException::class)
+    fun CopyDB(inputStream: InputStream, outputStream: OutputStream) {
+        //Copy one byte at a time
+        val buffer = ByteArray(1024)
+        var length: Int
+        while (inputStream.read(buffer).also { length = it } > 0) {
+            outputStream.write(buffer, 0, length)
+        }
+        inputStream.close()
+        outputStream.close()
+    }
+
+// ****  Receipt Selection  ****
 
     fun onAddReceipt(view: View) {
         val builder = AlertDialog.Builder(this)
@@ -55,7 +142,11 @@ class MainActivity : AppCompatActivity() {
             // Check there's a camera activity to handle intent
             takePictureIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
-                val photoFile: File? = try { createImageFile() } catch (ex: IOException) { null }
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    null
+                }
                 photoFile?.also {
                     photoURI = FileProvider.getUriForFile(
                         this,
@@ -73,8 +164,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             launchReceiptActivity()
-        }
-        else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
+        } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
             photoURI = data!!.data!!;
             launchReceiptActivity()
         }
