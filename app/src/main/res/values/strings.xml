@@ -8,4 +8,18 @@
     <string name="cancel">Cancel</string>
     <string name="folder">Folder:</string>
     <string name="total">Total:</string>
+    <string name="title">StoReceipt</string>
+    <string name="addFolder">Add Folder</string>
+    <string name="addFolderTitle">Add A New Folder</string>
+    <string name="noFolders">Click "Add Folder" To Get Started</string>
+    <string name="saveReceipt">Save Receipt</string>
+    <string name="save">Save</string>
+    <string name="parseFailed">Failed to read image text, please manually enter values.</string>
+    <string name="folderName">Folder Name</string>
+    <string name="businessName">Business Name</string>
+    <string name="businessNames">All Business Names</string>
+    <string name="addFolderFailed">Folder Creation Failed</string>
+    <string name="addFolderSuccess">Folder Created</string>
+    <string name="addReceiptFailed">Save Receipt Failed</string>
+    <string name="addReceiptSuccess">Receipt Saved</string>
 </resources>

@@ -11,12 +11,15 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
-import android.widget.Toast
+import android.widget.TextView
 import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hbennett.mlreceiptstorer.DB.DBAdapter
+import com.example.hbennett.mlreceiptstorer.dataclasses.Folder
 import java.io.*
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -30,90 +33,70 @@ class MainActivity : AppCompatActivity() {
     lateinit var currentPhotoPath: String;
     lateinit var photoURI: Uri;
 
-    //Folder RecyclerView
+    // Folder RecyclerView
     private lateinit var recyclerViewFolders: RecyclerView;
-    private lateinit var viewAdapter : RecyclerView.Adapter<*>;
     private lateinit var viewManager : RecyclerView.LayoutManager;
 
-    //Database Related
-    lateinit var folders: MutableList<Pair<Long, String>>; //Store the id and the folder name
-    lateinit var db: DBAdapter;
+    // Views
+    private lateinit var textViewGetStarted: TextView;
+
+    companion object {
+        lateinit var db: DBAdapter;
+        lateinit var viewAdapter : RecyclerView.Adapter<*>;
+        lateinit var folders: ArrayList<Folder>;
+        fun addFolder (folder: Folder) {
+            folders.add(folder)
+            viewAdapter.notifyDataSetChanged()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //Load the folders from the DB
-        db = DBAdapter(this)
-        //Initialize empty list
-        folders = mutableListOf<Pair<Long, String>>();
+        db = DBAdapter(this, baseContext)
+        folders = db.getAllFolders()
 
         // get the existing database file or from the assets folder if doesn't exist
-        try {
-            //create a database if it doesnt exist already in the file path
-            val destPath = "data/data/$packageName/databases"
-            val f = File(destPath)
-            if (!f.exists()) {
-                f.mkdirs()
-                f.createNewFile()
-                //copy db from assets folder
-                CopyDB(
-                    baseContext.assets.open("mydb"),
-                    FileOutputStream("$destPath/MyDB")
-                )
-            }
+//        try {
+//
+//
+//            //DEBUG DATA TO LOAD IN
+//            // Dont worry about multiple entries every time you load, it will fail the
+//            // insert if it already exists since folder name is a unique field
+//            db.open()
+//            db.insertFolder("folder name", listOf<String>())
+//            db.insertFolder("Another Demo Folder", listOf<String>())
+//            db.insertFolder("This folder doesnt smell like ham...", listOf<String>())
+//            db.insertFolder("Dennis the Dennist", listOf<String>())
+//        } finally {
+//            db.close()
+//        }
 
-            //Load the current folders
-            db.open()
+        // Show get started message if no folders created
+        textViewGetStarted = findViewById(R.id.textViewGetStarted)
+        if (folders.size === 0)
+            textViewGetStarted.visibility = View.VISIBLE;
 
-            //
-            //DEBUG DATA TO LOAD IN
-            // Dont worry about multiple entries every time you load, it will fail the
-            // insert if it already exists since folder name is a unique field
+        //Load recycler view from the folders
+        recyclerViewFolders = findViewById(R.id.recyclerViewFolders);
+        viewManager = LinearLayoutManager(this)
+        viewAdapter = FolderRecyclerAdapter(this, folders);
 
-            db.insertFolder("folder name", listOf<String>())
-            db.insertFolder("Another Demo Folder", listOf<String>())
-            db.insertFolder("This folder doesnt smell like ham...", listOf<String>())
-            db.insertFolder("Dennis the Dennist", listOf<String>())
-
-            var c : Cursor? = db.getAllFolders();
-
-            if (c!!.moveToFirst()) {
-                do {
-                    folders.add(Pair<Long, String> (c.getLong(0), c.getString(1)));
-                } while (c.moveToNext())
-            }
-
-            db.close()
-
-            //Load recycler view from the folders
-            recyclerViewFolders = findViewById(R.id.recyclerViewFolders);
-            viewManager = LinearLayoutManager(this)
-            viewAdapter = FolderRecyclerAdapter(this, folders);
-
-            recyclerViewFolders = findViewById<RecyclerView>(R.id.recyclerViewFolders).apply {
-                setHasFixedSize(true)
-                layoutManager = viewManager
-                adapter = viewAdapter
-            }
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
+        recyclerViewFolders.apply {
+            setHasFixedSize(true)
+            layoutManager = viewManager
+            adapter = viewAdapter
+            addItemDecoration(DividerItemDecoration(this.context, DividerItemDecoration.VERTICAL))
         }
     }
 
-    // copyDB to copy assets to phone
-    @Throws(IOException::class)
-    fun CopyDB(inputStream: InputStream, outputStream: OutputStream) {
-        //Copy one byte at a time
-        val buffer = ByteArray(1024)
-        var length: Int
-        while (inputStream.read(buffer).also { length = it } > 0) {
-            outputStream.write(buffer, 0, length)
-        }
-        inputStream.close()
-        outputStream.close()
+    override fun onResume() {
+        super.onResume()
+        if (folders.size > 0)
+            textViewGetStarted.visibility = View.INVISIBLE
+        recyclerViewFolders.adapter?.notifyDataSetChanged()
     }
 
 // ****  Receipt Selection  ****
@@ -189,5 +172,10 @@ class MainActivity : AppCompatActivity() {
     private fun onSelectPhoto() {
         val gallery = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
         startActivityForResult(gallery, PICK_IMAGE)
+    }
+
+    fun onAddFolder(view: View) {
+        val intent: Intent = Intent(this, AddFolderActivity::class.java)
+        startActivity(intent)
     }
 }

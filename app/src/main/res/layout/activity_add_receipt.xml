@@ -6,11 +6,26 @@
     android:layout_height="match_parent"
     tools:context=".AddReceiptActivity">
 
+    <Button
+        android:id="@+id/buttonAddBusinessName2"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/rounded_button"
+        android:backgroundTint="@color/baby_blue"
+        android:onClick="onAddFolder"
+        android:text="@string/plusSign"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewReceiptAdd" />
+
     <TextView
         android:id="@+id/textViewAddReceipt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:fontFamily="@font/alegreya_sc"
         android:text="@string/addReceipt"
         android:textSize="34sp"
         android:textStyle="bold"
@@ -24,7 +39,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/spinnerFolderSelect"
+        app:layout_constraintBottom_toTopOf="@+id/cardView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -37,6 +52,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
         android:layout_marginBottom="24dp"
+        android:fontFamily="@font/alegreya_sc"
         android:text="@string/folder"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/textViewTotalTitle"
@@ -48,21 +64,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
         android:layout_marginBottom="100dp"
+        android:fontFamily="@font/alegreya_sc"
         android:text="@string/total"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <Spinner
-        android:id="@+id/spinnerFolderSelect"
-        android:layout_width="0dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="64dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/editTextReceiptTotal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textViewFolderTitle" />
 
     <EditText
         android:id="@+id/editTextReceiptTotal"
@@ -72,9 +78,45 @@
         android:layout_marginEnd="64dp"
         android:layout_marginBottom="90dp"
         android:ems="10"
+        android:fontFamily="@font/alegreya_sc"
         android:inputType="numberDecimal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textViewTotalTitle" />
+
+    <Button
+        android:id="@+id/buttonSaveReceipt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="64dp"
+        android:background="@color/baby_blue"
+        android:fontFamily="@font/alegreya_sc"
+        android:onClick="onSaveReceipt"
+        android:text="@string/saveReceipt"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextReceiptTotal" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/editTextReceiptTotal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textViewFolderTitle">
+
+        <Spinner
+            android:id="@+id/spinnerFolderSelect"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
