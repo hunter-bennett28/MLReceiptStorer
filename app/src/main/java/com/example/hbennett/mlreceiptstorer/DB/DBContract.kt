@@ -12,8 +12,8 @@ import android.provider.BaseColumns
 
 object DBContract {
     //Tables are grouped together in objects
-    val DB_NAME = "receiptStorer";
-    val DB_VERSION = 1;
+    const val DB_NAME = "receiptStorer";
+    const val DB_VERSION = 1;
 
     //BaseColumns provides an _ID field
     object Folder : BaseColumns {
@@ -21,10 +21,10 @@ object DBContract {
         const val COLUMN_NAME_ALIAS = "alias"
     }
 
-    object BusinessPseudonym : BaseColumns {
-        const val TABLE_NAME = "businessPseudonym"
+    object Business : BaseColumns {
+        const val TABLE_NAME = "business"
         const val COLUMN_NAME_FOLDER_ID = "folderId"
-        const val COLUMN_NAME_PSEUDONYM = "pseudonym"
+        const val COLUMN_NAME_NAME = "name"
     }
 
     object Receipt : BaseColumns {

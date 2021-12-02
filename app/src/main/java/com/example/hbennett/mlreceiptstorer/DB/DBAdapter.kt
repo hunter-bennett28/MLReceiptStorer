@@ -8,45 +8,63 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.provider.BaseColumns
 import android.util.Log
+import com.example.hbennett.mlreceiptstorer.dataclasses.Business
+import com.example.hbennett.mlreceiptstorer.dataclasses.Folder
+import com.example.hbennett.mlreceiptstorer.dataclasses.Receipt
+import java.io.*
 import java.lang.Exception
 
-class DBAdapter {
+class DBAdapter : Closeable {
     companion object {
-        val SQL_CREATE_TABLES_SCRIPT = "CREATE TABLE ${DBContract.Folder.TABLE_NAME} (" +
-                "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "${DBContract.Folder.COLUMN_NAME_ALIAS} TEXT UNIQUE);" +
-                "" +
-                "CREATE TABLE ${DBContract.BusinessPseudonym} (" +
-                "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "${DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID} INTEGER NOT NULL" + //FK
-                "${DBContract.BusinessPseudonym.COLUMN_NAME_PSEUDONYM} TEXT" +
-                "CONSTRAINT FK_FolderID FOREIGN KEY (${DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID})" +
-                "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}));" +
-                "" +
-                "CREATE TABLE ${DBContract.Receipt} (" +
-                "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "${DBContract.Receipt.COLUMN_NAME_FOLDER_ID} INTEGER NOT NULL" + //FK
-                "${DBContract.Receipt.COLUMN_NAME_IMAGE} TEXT" +
-                "${DBContract.Receipt.COLUMN_NAME_TOTAL} DOUBLE" +
-                "CONSTRAINT FK_FolderID FOREIGN KEY (${DBContract.Receipt.COLUMN_NAME_FOLDER_ID})" +
-                "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID})"
-        val TAG = "DBAdapter"
+        const val SQL_CREATE_TABLE_FOLDER: String = "CREATE TABLE IF NOT EXISTS ${DBContract.Folder.TABLE_NAME} (" +
+                    "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "${DBContract.Folder.COLUMN_NAME_ALIAS} TEXT UNIQUE);"
+        const val SQL_CREATE_TABLE_BUSINESS: String = "CREATE TABLE IF NOT EXISTS  ${DBContract.Business.TABLE_NAME} (" +
+                    "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "${DBContract.Business.COLUMN_NAME_FOLDER_ID} INTEGER NOT NULL," + //FK
+                    "${DBContract.Business.COLUMN_NAME_NAME} TEXT," +
+                    "CONSTRAINT FK_FolderID FOREIGN KEY (${DBContract.Business.COLUMN_NAME_FOLDER_ID})" +
+                    "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}));"
+        const val SQL_CREATE_TABLE_RECEIPT: String = "CREATE TABLE IF NOT EXISTS ${DBContract.Receipt.TABLE_NAME} (" +
+                    "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "${DBContract.Receipt.COLUMN_NAME_FOLDER_ID} INTEGER NOT NULL," + //FK
+                    "${DBContract.Receipt.COLUMN_NAME_IMAGE} TEXT," +
+                    "${DBContract.Receipt.COLUMN_NAME_TOTAL} DOUBLE," +
+                    "CONSTRAINT FK_FolderID FOREIGN KEY (${DBContract.Receipt.COLUMN_NAME_FOLDER_ID}) " +
+                    "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}));"
+        const val TAG = "DBAdapter"
     }
 
     var context: Context? = null
     var DBHelper: DatabaseHelper? = null
     var db: SQLiteDatabase? = null
+    val packageName = "com.example.hbennett.mlreceiptstorer"
 
-    constructor(ctx: Context?) {
+    constructor(ctx: Context?, baseContext: Context) {
         context = ctx
         DBHelper = DatabaseHelper(context)
+        //create a database if it doesnt exist already in the file path
+        val destPath = "data/data/$packageName/databases"
+        val f = File(destPath)
+        if (!f.exists()) {
+            f.mkdirs()
+            f.createNewFile()
+            //copy db from assets folder
+            copyDB(
+                baseContext.assets.open("mydb"),
+                FileOutputStream("$destPath/MyDB")
+            )
+        }
+        openDB()
     }
 
     class DatabaseHelper internal constructor(context: Context?) :
         SQLiteOpenHelper(context, DBContract.DB_NAME, null, DBContract.DB_VERSION) {
         override fun onCreate(db: SQLiteDatabase) {
             try {
-                db.execSQL(SQL_CREATE_TABLES_SCRIPT)
+                db.execSQL(SQL_CREATE_TABLE_FOLDER)
+                db.execSQL(SQL_CREATE_TABLE_BUSINESS)
+                db.execSQL(SQL_CREATE_TABLE_RECEIPT)
             } catch (e: SQLException) {
                 e.printStackTrace()
             }
@@ -59,29 +77,42 @@ class DBAdapter {
             )
             db.execSQL(
                 "DROP TABLE IF EXISTS ${DBContract.Receipt.TABLE_NAME};" +
-                        "DROP TABLE IF EXISTS ${DBContract.BusinessPseudonym.TABLE_NAME};" +
+                        "DROP TABLE IF EXISTS ${DBContract.Business.TABLE_NAME};" +
                         "DROP TABLE IF EXISTS ${DBContract.Folder.TABLE_NAME};"
             )
             onCreate(db)
         }
     }
 
+    // copyDB to copy assets to phone
+    @Throws(IOException::class)
+    fun copyDB(inputStream: InputStream, outputStream: OutputStream) {
+        //Copy one byte at a time
+        val buffer = ByteArray(1024)
+        var length: Int
+        while (inputStream.read(buffer).also { length = it } > 0) {
+            outputStream.write(buffer, 0, length)
+        }
+        inputStream.close()
+        outputStream.close()
+    }
+
     //---opens the database---
     @Throws(SQLException::class)
-    fun open(): DBAdapter? {
+    fun openDB(): DBAdapter? {
         db = DBHelper!!.writableDatabase
         return this
     }
 
     //---closes the database---
-    fun close() {
+    fun closeDB() {
         DBHelper!!.close()
     }
 
     /**
-     * insertFolder - Insert a folder and its pseudonyms into the DB
+     * insertFolder - Insert a folder and its businesses into the DB
      */
-    fun insertFolder(alias: String?, pseudonym: List<String>): Long {
+    fun insertFolder(alias: String?, business: List<String>): Long {
         val initialValues = ContentValues()
         initialValues.put(DBContract.Folder.COLUMN_NAME_ALIAS, alias)
         var fid: Long = -1;
@@ -91,12 +122,12 @@ class DBAdapter {
 
             fid = db!!.insert(DBContract.Folder.TABLE_NAME, null, initialValues)
 
-            //Add each pseudonym to the pseudonym table
-            for (p in pseudonym) {
+            //Add each business to the business table
+            for (b in business) {
                 val initialValues = ContentValues()
-                initialValues.put(DBContract.BusinessPseudonym.COLUMN_NAME_PSEUDONYM, p)
-                initialValues.put(DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID, fid)
-                db!!.insert(DBContract.BusinessPseudonym.TABLE_NAME, null, initialValues)
+                initialValues.put(DBContract.Business.COLUMN_NAME_NAME, b)
+                initialValues.put(DBContract.Business.COLUMN_NAME_FOLDER_ID, fid)
+                db!!.insert(DBContract.Business.TABLE_NAME, null, initialValues)
             }
 
             db!!.setTransactionSuccessful();
@@ -121,7 +152,7 @@ class DBAdapter {
     }
 
     /**
-     * deleteFolder - deletes a folder, its receipts, and its pseudonyms from the DB by a folder row id
+     * deleteFolder - deletes a folder, its receipts, and its businesses from the DB by a folder row id
      */
     fun deleteFolder(rowId: Long): Boolean {
         var res: Boolean = false;
@@ -131,10 +162,10 @@ class DBAdapter {
 
             res = db!!.delete(DBContract.Folder.TABLE_NAME, BaseColumns._ID + "=" + rowId, null) > 0
 
-            if (res) { //A folder was deleted, we can delete each of its pseudonyms
+            if (res) { //A folder was deleted, we can delete each of its businesses
                 db!!.delete(
-                    DBContract.BusinessPseudonym.TABLE_NAME,
-                    DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID + "=" + rowId,
+                    DBContract.Business.TABLE_NAME,
+                    DBContract.Business.COLUMN_NAME_FOLDER_ID + "=" + rowId,
                     null
                 )
                 db!!.delete(
@@ -161,32 +192,57 @@ class DBAdapter {
     }
 
     /**
-     *  getAllFolders - returns a cursor to all of the current folders
+     *  getAllFolders - returns a list of the current folders
      */
-    fun getAllFolders(): Cursor? {
-        return db!!.query(
+    fun getAllFolders(): ArrayList<Folder> {
+        var folders: ArrayList<Folder> = ArrayList()
+        val cursor: Cursor = db!!.query(
             DBContract.Folder.TABLE_NAME, arrayOf(
                 BaseColumns._ID, DBContract.Folder.COLUMN_NAME_ALIAS
             ), null, null, null, null, null
         )
+        if (cursor!!.moveToFirst()) {
+            do {
+                folders.add(Folder(cursor.getLong(0), cursor.getString(1)));
+            } while (cursor.moveToNext())
+        }
+        return folders
     }
 
     /**
-     *  getPseudonyms - Gets all pseudonyms for a specified folder id
+     *  getBusinesses - Gets all businesses for a specified folder id
      */
-    fun getPseudonyms(rowId: Long): Cursor? {
-        return db!!.rawQuery(
-            "SELECT * FROM ${DBContract.BusinessPseudonym.TABLE_NAME} WHERE ${DBContract.BusinessPseudonym.COLUMN_NAME_FOLDER_ID} = ?",
+    fun getBusinesses(rowId: Long): ArrayList<Business> {
+        var businesses: ArrayList<Business> = ArrayList()
+        val cursor: Cursor = db!!.rawQuery(
+            "SELECT * FROM ${DBContract.Business.TABLE_NAME} WHERE ${DBContract.Business.COLUMN_NAME_FOLDER_ID} = ?",
             Array(1) { "$rowId" })
+
+        if (cursor!!.moveToFirst()) {
+            do {
+                businesses.add(Business(cursor.getLong(0), cursor.getLong(1), cursor.getString(2)));
+            } while (cursor.moveToNext())
+        }
+        return businesses
     }
 
     /**
      *  getReceipts - Gets all receipts for a specified folder id
      */
-    fun getReceipts(rowId: Long): Cursor? {
-        return db!!.rawQuery(
+    fun getReceipts(rowId: Long): ArrayList<Receipt> {
+        var receipts: ArrayList<Receipt> = ArrayList()
+        val cursor: Cursor = db!!.rawQuery(
             "SELECT * FROM ${DBContract.Receipt.TABLE_NAME} WHERE ${DBContract.Receipt.COLUMN_NAME_FOLDER_ID} = ?",
             Array(1) { "$rowId" })
+
+        if (cursor!!.moveToFirst()) {
+            do {
+                receipts.add(Receipt(
+                    cursor.getLong(0), cursor.getLong(1), cursor.getString(2), cursor.getDouble(3)
+                ));
+            } while (cursor.moveToNext())
+        }
+        return receipts
     }
 
     /**
@@ -202,6 +258,10 @@ class DBAdapter {
             BaseColumns._ID + "=" + rowId,
             null
         ) > 0
+    }
+
+    override fun close() {
+        closeDB()
     }
 
 }
