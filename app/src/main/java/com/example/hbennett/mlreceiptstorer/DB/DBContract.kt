@@ -32,5 +32,6 @@ object DBContract {
         const val COLUMN_NAME_FOLDER_ID = "folderId"
         const val COLUMN_NAME_IMAGE = "image"
         const val COLUMN_NAME_TOTAL = "total"
+        const val COLUMN_NAME_DATE = "date"
     }
 }

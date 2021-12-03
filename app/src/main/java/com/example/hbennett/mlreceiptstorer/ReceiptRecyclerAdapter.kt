@@ -6,26 +6,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.hbennett.mlreceiptstorer.dataclasses.Receipt
+import java.text.NumberFormat
 
-class BusinessRecyclerAdapter(
+class ReceiptRecyclerAdapter(
     private val context: Context,
-    private val folders: ArrayList<String>
+    private val receipts: ArrayList<Receipt>
 ) :
-    RecyclerView.Adapter<BusinessRecyclerAdapter.ViewHolder>() {
+    RecyclerView.Adapter<ReceiptRecyclerAdapter.ViewHolder>() {
 
     // Provide a reference to the views for each data item
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
-    private val namesPerView = 7;
+    private val namesPerView = 15;
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): BusinessRecyclerAdapter.ViewHolder {
+    ): ReceiptRecyclerAdapter.ViewHolder {
         // create a new view
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.recycler_view_business_names_layout, parent, false) as View
+            .inflate(R.layout.recycler_view_receipt_layout, parent, false) as View
         // set the view's size, margins, paddings and layout parameters
         val lp = view.layoutParams
         lp.height = parent.measuredHeight / namesPerView // display {namesPerView} per screen
@@ -35,10 +37,15 @@ class BusinessRecyclerAdapter(
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.view.findViewById<TextView>(R.id.textViewBusinessName).text =
-            folders[position] //Set it to use the name of the folder
+        holder.view.findViewById<TextView>(R.id.textViewDate).text =
+            receipts[position].date //Set it to use the date of the receipt
+
+        val numberFormatter: NumberFormat = NumberFormat.getCurrencyInstance();
+
+        holder.view.findViewById<TextView>(R.id.textViewTotal).text =
+            numberFormatter.format(receipts[position].total) //Set it to use the total of the receipt
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = folders.size
+    override fun getItemCount() = receipts.size
 }

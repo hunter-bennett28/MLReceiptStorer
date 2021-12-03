@@ -46,7 +46,8 @@ class AddReceiptActivity : AppCompatActivity() {
         for (f in folders)
             folderNames.add(f.alias)
 
-        var adapter: ArrayAdapter<String> = ArrayAdapter(this, android.R.layout.simple_spinner_item, folderNames);
+        var adapter: ArrayAdapter<String> =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, folderNames);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         spinnerFolderSelect.adapter = adapter;
@@ -85,16 +86,83 @@ class AddReceiptActivity : AppCompatActivity() {
     }
 
     private fun getFolderRecommendation(visionText: Text) {
+        val textBlockTitle: Text.TextBlock;
 
+        if (visionText.textBlocks.size > 0)
+            textBlockTitle = visionText.textBlocks[0];
+        else {
+            Toast.makeText(this, "Error reading the title of the receipt", Toast.LENGTH_LONG)
+                .show();
+            return;
+        }
+
+        //Run each through the levenshtein edit distance formula to detect which is the closest match
+        var closestDistance: Int? = null;
+        var closestFolderIndex: Int = 0;
+
+        folders.forEachIndexed { index, f ->
+            val businessNames = MainActivity.db.getBusinesses(f.id!!)
+
+            //Get closest distance over all business names for the folder
+            var distance: Int? = null;
+            businessNames.forEach { b ->
+                val bNDistance = editDistance(textBlockTitle.text, b.name)
+
+                if (distance == null)
+                    distance = bNDistance;
+                else if (bNDistance < distance!!)
+                    distance = bNDistance;
+            }
+
+            //check the folder's closes distance against the current closest
+            if (closestDistance == null) {
+                closestDistance = distance;
+                closestFolderIndex = index;
+            } else if (distance!! < closestDistance!!) {
+                closestDistance = distance;
+                closestFolderIndex = index;
+            }
+        }
+
+        findViewById<Spinner>(R.id.spinnerFolderSelect).setSelection(closestFolderIndex)
+    }
+
+    // Example implementation of the Levenshtein Edit Distance
+    // See http://rosettacode.org/wiki/Levenshtein_distance#Java
+    fun editDistance(s1: String, s2: String): Int {
+        var s1 = s1
+        var s2 = s2
+        s1 = s1.toLowerCase()
+        s2 = s2.toLowerCase()
+        val costs = IntArray(s2.length + 1)
+        for (i in 0..s1.length) {
+            var lastValue = i
+            for (j in 0..s2.length) {
+                if (i == 0) costs[j] = j else {
+                    if (j > 0) {
+                        var newValue = costs[j - 1]
+                        if (s1[i - 1] != s2[j - 1]) newValue = Math.min(
+                            Math.min(newValue, lastValue),
+                            costs[j]
+                        ) + 1
+                        costs[j - 1] = lastValue
+                        lastValue = newValue
+                    }
+                }
+            }
+            if (i > 0) costs[s2.length] = lastValue
+        }
+        return costs[s2.length]
     }
 
     fun onSaveReceipt(view: View) {
         // Parse values
         val selectedFolder: String = spinnerFolderSelect.selectedItem.toString()
-        val fid: Long = folders.find{ it.alias === selectedFolder}?.id as Long
+        val fid: Long = folders.find { it.alias === selectedFolder }?.id as Long
 
         // Ensure value is only 2 decimal places
-        var totalValue: Double =  Math.round(editTextReceiptTotal.text.toString().toDouble() * 100.0) / 100.0
+        var totalValue: Double =
+            Math.round(editTextReceiptTotal.text.toString().toDouble() * 100.0) / 100.0
 
         // Add to db
         val result: Long = MainActivity.db.insertReceipt(fid, photoUriPath, totalValue)
