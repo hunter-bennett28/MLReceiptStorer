@@ -13,6 +13,9 @@ import com.example.hbennett.mlreceiptstorer.dataclasses.Folder
 import com.example.hbennett.mlreceiptstorer.dataclasses.Receipt
 import java.io.*
 import java.lang.Exception
+import java.time.LocalDate
+import java.util.*
+import kotlin.collections.ArrayList
 
 class DBAdapter : Closeable {
     companion object {
@@ -30,6 +33,7 @@ class DBAdapter : Closeable {
                     "${DBContract.Receipt.COLUMN_NAME_FOLDER_ID} INTEGER NOT NULL," + //FK
                     "${DBContract.Receipt.COLUMN_NAME_IMAGE} TEXT," +
                     "${DBContract.Receipt.COLUMN_NAME_TOTAL} DOUBLE," +
+                    "${DBContract.Receipt.COLUMN_NAME_DATE} TEXT," +
                     "CONSTRAINT FK_FolderID FOREIGN KEY (${DBContract.Receipt.COLUMN_NAME_FOLDER_ID}) " +
                     "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}));"
         const val TAG = "DBAdapter"
@@ -147,6 +151,7 @@ class DBAdapter : Closeable {
         initialValues.put(DBContract.Receipt.COLUMN_NAME_FOLDER_ID, fid)
         initialValues.put(DBContract.Receipt.COLUMN_NAME_IMAGE, image)
         initialValues.put(DBContract.Receipt.COLUMN_NAME_TOTAL, total)
+        initialValues.put(DBContract.Receipt.COLUMN_NAME_DATE, LocalDate.now().toString())
 
         return db!!.insert(DBContract.Receipt.TABLE_NAME, null, initialValues);
     }
@@ -212,11 +217,11 @@ class DBAdapter : Closeable {
     /**
      *  getBusinesses - Gets all businesses for a specified folder id
      */
-    fun getBusinesses(rowId: Long): ArrayList<Business> {
+    fun getBusinesses(folderId: Long): ArrayList<Business> {
         var businesses: ArrayList<Business> = ArrayList()
         val cursor: Cursor = db!!.rawQuery(
             "SELECT * FROM ${DBContract.Business.TABLE_NAME} WHERE ${DBContract.Business.COLUMN_NAME_FOLDER_ID} = ?",
-            Array(1) { "$rowId" })
+            Array(1) { "$folderId" })
 
         if (cursor!!.moveToFirst()) {
             do {
@@ -229,16 +234,16 @@ class DBAdapter : Closeable {
     /**
      *  getReceipts - Gets all receipts for a specified folder id
      */
-    fun getReceipts(rowId: Long): ArrayList<Receipt> {
+    fun getReceipts(folderId: Long): ArrayList<Receipt> {
         var receipts: ArrayList<Receipt> = ArrayList()
         val cursor: Cursor = db!!.rawQuery(
             "SELECT * FROM ${DBContract.Receipt.TABLE_NAME} WHERE ${DBContract.Receipt.COLUMN_NAME_FOLDER_ID} = ?",
-            Array(1) { "$rowId" })
+            Array(1) { "$folderId" })
 
         if (cursor!!.moveToFirst()) {
             do {
                 receipts.add(Receipt(
-                    cursor.getLong(0), cursor.getLong(1), cursor.getString(2), cursor.getDouble(3)
+                    cursor.getLong(0), cursor.getLong(1), cursor.getString(2), cursor.getDouble(3), cursor.getString(4)
                 ));
             } while (cursor.moveToNext())
         }
