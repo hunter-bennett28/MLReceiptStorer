@@ -21,7 +21,8 @@
         android:textSize="16sp"
         app:cornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="TextContrastCheck" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewFolders"
@@ -44,7 +45,8 @@
         android:textColor="#FFFFFF"
         android:textSize="36sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageViewTitleHeader" />
+        app:layout_constraintTop_toTopOf="@+id/imageViewTitleHeader"
+        tools:ignore="TextContrastCheck" />
 
     <ImageView
         android:id="@+id/imageViewTitleHeader"
@@ -53,12 +55,14 @@
         android:layout_marginStart="-4dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="-4dp"
+        android:contentDescription="@string/folderHeaderDescription"
         android:translationZ="-100sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.428"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/folder_top" />
+        app:srcCompat="@drawable/folder_top"
+        tools:ignore="ImageContrastCheck" />
 
     <Button
         android:id="@+id/button"
@@ -68,6 +72,7 @@
         android:layout_marginEnd="-4dp"
         android:layout_marginBottom="-6dp"
         android:backgroundTint="#8EB4D9"
+        android:fontFamily="@font/alegreya_sc"
         android:onClick="onAddFolder"
         android:text="@string/addFolder"
         android:textColor="#FFFFFF"
@@ -75,7 +80,8 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="TextContrastCheck" />
 
     <TextView
         android:id="@+id/textViewGetStarted"

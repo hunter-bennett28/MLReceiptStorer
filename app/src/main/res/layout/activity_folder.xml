@@ -15,6 +15,7 @@
         android:layout_marginEnd="16dp"
         android:autoSizeTextType="uniform"
         android:fontFamily="@font/alegreya_sc"
+        android:textAlignment="center"
         android:textColor="#FFFFFF"
         android:textSize="36sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -64,10 +65,12 @@
         android:layout_width="0dp"
         android:layout_height="82dp"
         android:layout_marginStart="-4dp"
+        android:contentDescription="@string/folderHeaderDescription"
         android:rotationY="180"
         android:translationZ="-100sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/folder_top" />
+        app:srcCompat="@drawable/folder_top"
+        tools:ignore="ImageContrastCheck" />
 </androidx.constraintlayout.widget.ConstraintLayout>

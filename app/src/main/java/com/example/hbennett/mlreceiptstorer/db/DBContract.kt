@@ -1,19 +1,19 @@
-package com.example.hbennett.mlreceiptstorer.DB
+package com.example.hbennett.mlreceiptstorer.db
 
-import android.provider.BaseColumns
-
-
-/** DBContract.kt
+/**
+ * DBContract.kt
  * Connor Black, Hunter Bennett
  *
  * Implements a DB Contract that will be fulfilled by sqlite based on the documentation from:
  * https://developer.android.com/training/data-storage/sqlite#kotlin
  */
 
+import android.provider.BaseColumns
+
 object DBContract {
     //Tables are grouped together in objects
-    const val DB_NAME = "receiptStorer";
-    const val DB_VERSION = 1;
+    const val DB_NAME = "receiptStorer"
+    const val DB_VERSION = 1
 
     //BaseColumns provides an _ID field
     object Folder : BaseColumns {

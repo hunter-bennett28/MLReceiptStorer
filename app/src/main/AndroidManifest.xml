@@ -23,9 +23,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MLReceiptStorer">
         <activity
-            android:name=".AddFolderActivity"
+            android:name=".ViewReceiptActivity"
             android:exported="true" />
-        <!-- android:theme="@style/Theme.AppCompat.Light.NoActionBar"> -->
+        <activity
+            android:name=".AddFolderActivity"
+            android:exported="true" /> <!-- android:theme="@style/Theme.AppCompat.Light.NoActionBar"> -->
         <activity
             android:name=".FolderActivity"
             android:exported="true" />

@@ -1,4 +1,11 @@
-package com.example.hbennett.mlreceiptstorer.DB
+package com.example.hbennett.mlreceiptstorer.db
+
+/**
+ * DBAdapter.kt
+ * Connor Black, Hunter Bennett
+ *
+ * DB utility class for database creation and management.
+ */
 
 import android.content.ContentValues
 import android.content.Context
@@ -14,7 +21,6 @@ import com.example.hbennett.mlreceiptstorer.dataclasses.Receipt
 import java.io.*
 import java.lang.Exception
 import java.time.LocalDate
-import java.util.*
 import kotlin.collections.ArrayList
 
 class DBAdapter : Closeable {
@@ -62,8 +68,10 @@ class DBAdapter : Closeable {
         openDB()
     }
 
+    // Helper class for performing DB management
     class DatabaseHelper internal constructor(context: Context?) :
         SQLiteOpenHelper(context, DBContract.DB_NAME, null, DBContract.DB_VERSION) {
+        // Creates the required DB tables
         override fun onCreate(db: SQLiteDatabase) {
             try {
                 db.execSQL(SQL_CREATE_TABLE_FOLDER)
@@ -74,15 +82,16 @@ class DBAdapter : Closeable {
             }
         }
 
+        // Upgrades the DB if a new version is found
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
             Log.w(
                 DBAdapter.TAG, "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ", which will destroy all old data"
             )
             db.execSQL(
-                "DROP TABLE IF EXISTS ${DBContract.Receipt.TABLE_NAME};" +
-                        "DROP TABLE IF EXISTS ${DBContract.Business.TABLE_NAME};" +
-                        "DROP TABLE IF EXISTS ${DBContract.Folder.TABLE_NAME};"
+                "DROP TABLE IF EXISTS ${DBContract.Receipt.TABLE_NAME}" +
+                        "DROP TABLE IF EXISTS ${DBContract.Business.TABLE_NAME}" +
+                        "DROP TABLE IF EXISTS ${DBContract.Folder.TABLE_NAME}"
             )
             onCreate(db)
         }
@@ -101,15 +110,15 @@ class DBAdapter : Closeable {
         outputStream.close()
     }
 
-    //---opens the database---
+    // opens the database
     @Throws(SQLException::class)
-    fun openDB(): DBAdapter? {
+    private fun openDB(): DBAdapter? {
         db = DBHelper!!.writableDatabase
         return this
     }
 
-    //---closes the database---
-    fun closeDB() {
+    // closes the database
+    private fun closeDB() {
         DBHelper!!.close()
     }
 
@@ -117,29 +126,29 @@ class DBAdapter : Closeable {
      * insertFolder - Insert a folder and its businesses into the DB
      */
     fun insertFolder(alias: String?, business: List<String>): Long {
-        val initialValues = ContentValues()
+        var initialValues = ContentValues()
         initialValues.put(DBContract.Folder.COLUMN_NAME_ALIAS, alias)
-        var fid: Long = -1;
+        var fid: Long = -1
         //Initialize transaction
         try {
-            db!!.beginTransaction();
+            db!!.beginTransaction()
 
             fid = db!!.insert(DBContract.Folder.TABLE_NAME, null, initialValues)
 
             //Add each business to the business table
             for (b in business) {
-                val initialValues = ContentValues()
+                initialValues = ContentValues()
                 initialValues.put(DBContract.Business.COLUMN_NAME_NAME, b)
                 initialValues.put(DBContract.Business.COLUMN_NAME_FOLDER_ID, fid)
                 db!!.insert(DBContract.Business.TABLE_NAME, null, initialValues)
             }
 
-            db!!.setTransactionSuccessful();
+            db!!.setTransactionSuccessful()
         } catch (e: Exception) {
-            e.printStackTrace();
+            e.printStackTrace()
         } finally {
-            db!!.endTransaction();
-            return fid;
+            db!!.endTransaction()
+            return fid
         }
     }
 
@@ -153,17 +162,17 @@ class DBAdapter : Closeable {
         initialValues.put(DBContract.Receipt.COLUMN_NAME_TOTAL, total)
         initialValues.put(DBContract.Receipt.COLUMN_NAME_DATE, LocalDate.now().toString())
 
-        return db!!.insert(DBContract.Receipt.TABLE_NAME, null, initialValues);
+        return db!!.insert(DBContract.Receipt.TABLE_NAME, null, initialValues)
     }
 
     /**
      * deleteFolder - deletes a folder, its receipts, and its businesses from the DB by a folder row id
      */
     fun deleteFolder(rowId: Long): Boolean {
-        var res: Boolean = false;
+        var res: Boolean = false
 
         try {
-            db!!.beginTransaction();
+            db!!.beginTransaction()
 
             res = db!!.delete(DBContract.Folder.TABLE_NAME, BaseColumns._ID + "=" + rowId, null) > 0
 
@@ -180,12 +189,12 @@ class DBAdapter : Closeable {
                 )
             }
 
-            db!!.setTransactionSuccessful();
+            db!!.setTransactionSuccessful()
         } catch (e: Exception) {
-            e.printStackTrace();
+            e.printStackTrace()
         } finally {
-            db!!.endTransaction();
-            return res;
+            db!!.endTransaction()
+            return res
         }
     }
 
@@ -206,9 +215,9 @@ class DBAdapter : Closeable {
                 BaseColumns._ID, DBContract.Folder.COLUMN_NAME_ALIAS
             ), null, null, null, null, null
         )
-        if (cursor!!.moveToFirst()) {
+        if (cursor.moveToFirst()) {
             do {
-                folders.add(Folder(cursor.getLong(0), cursor.getString(1)));
+                folders.add(Folder(cursor.getLong(0), cursor.getString(1)))
             } while (cursor.moveToNext())
         }
         return folders
@@ -223,9 +232,9 @@ class DBAdapter : Closeable {
             "SELECT * FROM ${DBContract.Business.TABLE_NAME} WHERE ${DBContract.Business.COLUMN_NAME_FOLDER_ID} = ?",
             Array(1) { "$folderId" })
 
-        if (cursor!!.moveToFirst()) {
+        if (cursor.moveToFirst()) {
             do {
-                businesses.add(Business(cursor.getLong(0), cursor.getLong(1), cursor.getString(2)));
+                businesses.add(Business(cursor.getLong(0), cursor.getLong(1), cursor.getString(2)))
             } while (cursor.moveToNext())
         }
         return businesses
@@ -240,11 +249,11 @@ class DBAdapter : Closeable {
             "SELECT * FROM ${DBContract.Receipt.TABLE_NAME} WHERE ${DBContract.Receipt.COLUMN_NAME_FOLDER_ID} = ?",
             Array(1) { "$folderId" })
 
-        if (cursor!!.moveToFirst()) {
+        if (cursor.moveToFirst()) {
             do {
                 receipts.add(Receipt(
                     cursor.getLong(0), cursor.getLong(1), cursor.getString(2), cursor.getDouble(3), cursor.getString(4)
-                ));
+                ))
             } while (cursor.moveToNext())
         }
         return receipts
@@ -265,6 +274,9 @@ class DBAdapter : Closeable {
         ) > 0
     }
 
+    /**
+     * close - destructor method for ensuring DB is closed
+     */
     override fun close() {
         closeDB()
     }
