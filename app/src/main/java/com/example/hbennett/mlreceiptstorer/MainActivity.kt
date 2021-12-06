@@ -7,16 +7,18 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 
 import android.content.DialogInterface
-import android.database.Cursor
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.hbennett.mlreceiptstorer.DB.DBAdapter
+import com.example.hbennett.mlreceiptstorer.db.DBAdapter
 import com.example.hbennett.mlreceiptstorer.dataclasses.Folder
 import java.io.*
 import java.lang.Exception
@@ -26,24 +28,24 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
     // Constants
-    val REQUEST_IMAGE_CAPTURE = 1;
-    val PICK_IMAGE = 2;
+    private val requestImageCapture = 1
+    private val pickImage = 2
 
     // Misc
-    lateinit var currentPhotoPath: String;
-    lateinit var photoURI: Uri;
+    lateinit var currentPhotoPath: String
+    lateinit var photoURI: Uri
 
     // Folder RecyclerView
-    private lateinit var recyclerViewFolders: RecyclerView;
-    private lateinit var viewManager : RecyclerView.LayoutManager;
+    private lateinit var recyclerViewFolders: RecyclerView
+    private lateinit var viewManager : RecyclerView.LayoutManager
 
     // Views
-    private lateinit var textViewGetStarted: TextView;
+    private lateinit var textViewGetStarted: TextView
 
     companion object {
-        lateinit var db: DBAdapter;
-        lateinit var viewAdapter : RecyclerView.Adapter<*>;
-        lateinit var folders: ArrayList<Folder>;
+        lateinit var db: DBAdapter
+        lateinit var viewAdapter : RecyclerView.Adapter<*>
+        lateinit var folders: ArrayList<Folder>
         fun addFolder (folder: Folder) {
             folders.add(folder)
             viewAdapter.notifyDataSetChanged()
@@ -58,31 +60,15 @@ class MainActivity : AppCompatActivity() {
         db = DBAdapter(this, baseContext)
         folders = db.getAllFolders()
 
-        // get the existing database file or from the assets folder if doesn't exist
-//        try {
-//
-//
-//            //DEBUG DATA TO LOAD IN
-//            // Dont worry about multiple entries every time you load, it will fail the
-//            // insert if it already exists since folder name is a unique field
-//            db.open()
-//            db.insertFolder("folder name", listOf<String>())
-//            db.insertFolder("Another Demo Folder", listOf<String>())
-//            db.insertFolder("This folder doesnt smell like ham...", listOf<String>())
-//            db.insertFolder("Dennis the Dennist", listOf<String>())
-//        } finally {
-//            db.close()
-//        }
-
         // Show get started message if no folders created
         textViewGetStarted = findViewById(R.id.textViewGetStarted)
         if (folders.size === 0)
-            textViewGetStarted.visibility = View.VISIBLE;
+            textViewGetStarted.visibility = View.VISIBLE
 
         //Load recycler view from the folders
-        recyclerViewFolders = findViewById(R.id.recyclerViewFolders);
+        recyclerViewFolders = findViewById(R.id.recyclerViewFolders)
         viewManager = LinearLayoutManager(this)
-        viewAdapter = FolderRecyclerAdapter(this, folders);
+        viewAdapter = FolderRecyclerAdapter(this, folders)
 
         recyclerViewFolders.apply {
             setHasFixedSize(true)
@@ -92,15 +78,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Reload folders data on resume because other activites add folders
     override fun onResume() {
         super.onResume()
+        // If there are folders, hide the get started message
         if (folders.size > 0)
             textViewGetStarted.visibility = View.INVISIBLE
         recyclerViewFolders.adapter?.notifyDataSetChanged()
     }
 
-// ****  Receipt Selection  ****
-
+    // Creates a dialog for the user to select image upload method
     fun onAddReceipt(view: View) {
         val builder = AlertDialog.Builder(this)
             .setTitle(R.string.addReceipt)
@@ -120,6 +107,7 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
+    // Creates a file to save the image in and launches the ACTION_IMAGE_CAPTURE intent for taking photos
     private fun onTakePhoto() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             // Check there's a camera activity to handle intent
@@ -137,28 +125,56 @@ class MainActivity : AppCompatActivity() {
                         it
                     )
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+                    startActivityForResult(takePictureIntent, requestImageCapture)
                 }
             }
         }
     }
 
+    // Handles processing results returned from the take photo or upload photo activity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == requestImageCapture && resultCode == RESULT_OK) {
             launchReceiptActivity()
-        } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
-            photoURI = data!!.data!!;
+        } else if (requestCode == pickImage && resultCode == RESULT_OK) {
+            // Extract the URI from the result
+            photoURI = data!!.data!!
+
+            // Save photo data to new file since API revokes access once app closed for returned URI
+            try {
+                savePhotoURI()
+            } catch (ex: Exception) {
+                Toast.makeText(this, R.string.savePhotoFailed, Toast.LENGTH_LONG).show()
+                return
+            }
             launchReceiptActivity()
         }
     }
 
+    // Launches the AddReceiptActivity, passing the saved URI
     private fun launchReceiptActivity() {
         val intent: Intent = Intent(this, AddReceiptActivity::class.java)
         intent.putExtra("photoURI", photoURI.toString())
         startActivity(intent)
     }
 
+    // Save the content of the current photoURI to a new local file for permanent access
+    private fun savePhotoURI() {
+        // Create a file to save the content in
+        val saveFile: File = createImageFile()
+
+        // Save the image Bitmap to the new file
+        var fos: FileOutputStream = FileOutputStream(saveFile)
+        val imageBitMap: Bitmap? =
+            MediaStore.Images.Media.getBitmap(this.contentResolver, photoURI)
+        imageBitMap?.compress(Bitmap.CompressFormat.PNG, 100, fos)
+        fos.close()
+
+        // Update the photo's URI
+        photoURI = saveFile.toUri()
+    }
+
+    // Creates a new image file to save the receipt image in for permanent local access
     @Throws(IOException::class)
     private fun createImageFile(): File {
         // Create an image file name
@@ -169,11 +185,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Launches the ACTION_PICK intent for selecting a receipt from the camera roll
     private fun onSelectPhoto() {
         val gallery = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
-        startActivityForResult(gallery, PICK_IMAGE)
+        startActivityForResult(gallery, pickImage)
     }
 
+    // Opens the AddFolderActivity
     fun onAddFolder(view: View) {
         val intent: Intent = Intent(this, AddFolderActivity::class.java)
         startActivity(intent)

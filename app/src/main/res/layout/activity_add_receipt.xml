@@ -18,7 +18,8 @@
         android:text="@string/plusSign"
         android:textColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewReceiptAdd" />
+        app:layout_constraintTop_toBottomOf="@+id/imageViewReceiptAdd"
+        tools:ignore="TouchTargetSizeCheck,TextContrastCheck" />
 
     <TextView
         android:id="@+id/textViewAddReceipt"
@@ -39,6 +40,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
+        android:contentDescription="@string/receiptDescription"
         app:layout_constraintBottom_toTopOf="@+id/cardView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -82,7 +84,8 @@
         android:inputType="numberDecimal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textViewTotalTitle" />
+        app:layout_constraintStart_toEndOf="@+id/textViewTotalTitle"
+        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
     <Button
         android:id="@+id/buttonSaveReceipt"
@@ -100,7 +103,8 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextReceiptTotal" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextReceiptTotal"
+        tools:ignore="TextContrastCheck" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
@@ -116,7 +120,8 @@
         <Spinner
             android:id="@+id/spinnerFolderSelect"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

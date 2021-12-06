@@ -8,22 +8,22 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.widget.*
-import com.example.hbennett.mlreceiptstorer.DB.DBAdapter
 import com.example.hbennett.mlreceiptstorer.dataclasses.Folder
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import kotlin.math.round
 
 class AddReceiptActivity : AppCompatActivity() {
     // Views
-    lateinit var imageViewReceiptAdd: ImageView;
-    lateinit var spinnerFolderSelect: Spinner;
-    lateinit var editTextReceiptTotal: EditText;
+    lateinit var imageViewReceiptAdd: ImageView
+    lateinit var spinnerFolderSelect: Spinner
+    lateinit var editTextReceiptTotal: EditText
     lateinit var folders: ArrayList<Folder>
 
     // Misc
-    lateinit var photoUriPath: String;
+    lateinit var photoUriPath: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,12 +33,12 @@ class AddReceiptActivity : AppCompatActivity() {
         editTextReceiptTotal = findViewById(R.id.editTextReceiptTotal)
         editTextReceiptTotal.setText("0.0")
         photoUriPath = intent.getStringExtra("photoURI")!!
-        var imageUri: Uri = Uri.parse(photoUriPath);
+        var imageUri: Uri = Uri.parse(photoUriPath)
         var imageBitMap: Bitmap? =
-            MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri);
-        imageViewReceiptAdd.setImageBitmap(imageBitMap);
+            MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri)
+        imageViewReceiptAdd.setImageBitmap(imageBitMap)
 
-        setUpRecognizer(imageBitMap)
+        processImageText(imageBitMap)
 
         // Get folders
         folders = MainActivity.db.getAllFolders()
@@ -47,13 +47,15 @@ class AddReceiptActivity : AppCompatActivity() {
             folderNames.add(f.alias)
 
         var adapter: ArrayAdapter<String> =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, folderNames);
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, folderNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        spinnerFolderSelect.adapter = adapter;
+        spinnerFolderSelect.adapter = adapter
+        spinnerFolderSelect.setSelection(0)
     }
 
-    private fun setUpRecognizer(imageBitMap: Bitmap?) {
+    // Sets up OCR recognizer and extracts text
+    private fun processImageText(imageBitMap: Bitmap?) {
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
         val image = InputImage.fromBitmap(imageBitMap, 0)
         recognizer.process(image)
@@ -66,11 +68,13 @@ class AddReceiptActivity : AppCompatActivity() {
             }
     }
 
+    // Attempts to get the total from the receipt, taking the last monetary value or the next after
+    // finding the word "total"
     private fun getReceiptTotal(visionText: Text) {
         val moneyRegex: Regex = Regex(".*\\.[0-9]{2}\$")
-        val totalRegex: Regex = Regex("^total.*", RegexOption.IGNORE_CASE)
-        var totalFound: Boolean = false;
-        var total: String = "0.0";
+        val totalRegex: Regex = Regex("^total[:]", RegexOption.IGNORE_CASE)
+        var totalFound: Boolean = false
+        var total: String = "0.0"
 
         // Get either the last money value or the one immediately after finding "total"
         for (block in visionText.textBlocks) {
@@ -85,55 +89,54 @@ class AddReceiptActivity : AppCompatActivity() {
         editTextReceiptTotal.setText(total.replace("$", ""))
     }
 
+    // Uses the Levenshtein distance formula for trying to get the correct business name from saved ones
     private fun getFolderRecommendation(visionText: Text) {
-        val textBlockTitle: Text.TextBlock;
+        val textBlockTitle: Text.TextBlock
 
         if (visionText.textBlocks.size > 0)
-            textBlockTitle = visionText.textBlocks[0];
+            textBlockTitle = visionText.textBlocks[0]
         else {
             Toast.makeText(this, "Error reading the title of the receipt", Toast.LENGTH_LONG)
-                .show();
-            return;
+                .show()
+            return
         }
 
         //Run each through the levenshtein edit distance formula to detect which is the closest match
-        var closestDistance: Int? = null;
-        var closestFolderIndex: Int = 0;
+        var closestDistance: Int? = null
+        var closestFolderIndex: Int = 0
 
         folders.forEachIndexed { index, f ->
             val businessNames = MainActivity.db.getBusinesses(f.id!!)
 
             //Get closest distance over all business names for the folder
-            var distance: Int? = null;
+            var distance: Int? = null
             businessNames.forEach { b ->
                 val bNDistance = editDistance(textBlockTitle.text, b.name)
 
                 if (distance == null)
-                    distance = bNDistance;
+                    distance = bNDistance
                 else if (bNDistance < distance!!)
-                    distance = bNDistance;
+                    distance = bNDistance
             }
 
             //check the folder's closes distance against the current closest
             if (closestDistance == null) {
-                closestDistance = distance;
-                closestFolderIndex = index;
+                closestDistance = distance
+                closestFolderIndex = index
             } else if (distance!! < closestDistance!!) {
-                closestDistance = distance;
-                closestFolderIndex = index;
+                closestDistance = distance
+                closestFolderIndex = index
             }
         }
 
         findViewById<Spinner>(R.id.spinnerFolderSelect).setSelection(closestFolderIndex)
     }
 
-    // Example implementation of the Levenshtein Edit Distance
+    // Implementation of the Levenshtein Edit Distance
     // See http://rosettacode.org/wiki/Levenshtein_distance#Java
-    fun editDistance(s1: String, s2: String): Int {
-        var s1 = s1
-        var s2 = s2
-        s1 = s1.toLowerCase()
-        s2 = s2.toLowerCase()
+    fun editDistance(str1: String, str2: String): Int {
+        var s1 = str1.lowercase()
+        var s2 = str2.lowercase()
         val costs = IntArray(s2.length + 1)
         for (i in 0..s1.length) {
             var lastValue = i
@@ -155,6 +158,7 @@ class AddReceiptActivity : AppCompatActivity() {
         return costs[s2.length]
     }
 
+    // Saves the receipt to the DB
     fun onSaveReceipt(view: View) {
         // Parse values
         val selectedFolder: String = spinnerFolderSelect.selectedItem.toString()
@@ -162,7 +166,7 @@ class AddReceiptActivity : AppCompatActivity() {
 
         // Ensure value is only 2 decimal places
         var totalValue: Double =
-            Math.round(editTextReceiptTotal.text.toString().toDouble() * 100.0) / 100.0
+            round(editTextReceiptTotal.text.toString().toDouble() * 100.0) / 100.0
 
         // Add to db
         val result: Long = MainActivity.db.insertReceipt(fid, photoUriPath, totalValue)
@@ -174,9 +178,9 @@ class AddReceiptActivity : AppCompatActivity() {
         }
     }
 
+    // Launches the AddFolder activity
     fun onAddFolder(view: View) {
         val intent: Intent = Intent(this, AddFolderActivity::class.java)
         startActivity(intent)
     }
-
 }

@@ -1,6 +1,7 @@
 package com.example.hbennett.mlreceiptstorer
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +19,7 @@ class ReceiptRecyclerAdapter(
     // Provide a reference to the views for each data item
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
-    private val namesPerView = 15;
+    private val namesPerView = 15
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(
@@ -28,19 +29,19 @@ class ReceiptRecyclerAdapter(
         // create a new view
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.recycler_view_receipt_layout, parent, false) as View
-        // set the view's size, margins, paddings and layout parameters
-        val lp = view.layoutParams
-        lp.height = parent.measuredHeight / namesPerView // display {namesPerView} per screen
-        view.layoutParams = lp
         return ViewHolder(view)
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.view.findViewById<TextView>(R.id.textViewDate).text =
-            receipts[position].date //Set it to use the date of the receipt
-
-        val numberFormatter: NumberFormat = NumberFormat.getCurrencyInstance();
+        var dateText: TextView = holder.view.findViewById<TextView>(R.id.textViewDate)
+        dateText.text = receipts[position].date // Set it to use the date of the receipt
+        holder.view.setOnClickListener() {
+            val intent: Intent = Intent(context, ViewReceiptActivity::class.java, )
+            intent.putExtra("image", receipts[position].image)
+            context.startActivity(intent)
+        }
+        val numberFormatter: NumberFormat = NumberFormat.getCurrencyInstance()
 
         holder.view.findViewById<TextView>(R.id.textViewTotal).text =
             numberFormatter.format(receipts[position].total) //Set it to use the total of the receipt

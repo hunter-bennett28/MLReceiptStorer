@@ -54,7 +54,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewAddFolderName"
-        tools:ignore="SpeakableTextPresentCheck" />
+        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck"
+        android:importantForAutofill="no" />
 
     <EditText
         android:id="@+id/editTextBusinessName"
@@ -66,7 +67,8 @@
         android:inputType="textPersonName"
         app:layout_constraintEnd_toStartOf="@+id/buttonAddBusinessName"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewAddBusinessNames" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewAddBusinessNames"
+        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
     <Button
         android:id="@+id/buttonAddBusinessName"
@@ -78,7 +80,8 @@
         android:onClick="onAddBusinessName"
         android:text="@string/plusSign"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextFolderName" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextFolderName"
+        tools:ignore="TouchTargetSizeCheck,TextContrastCheck" />
 
     <Button
         android:id="@+id/buttonSaveFolder"
@@ -94,7 +97,8 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/buttonCancelAddFolder" />
+        app:layout_constraintStart_toEndOf="@+id/buttonCancelAddFolder"
+        tools:ignore="TextContrastCheck" />
 
     <Button
         android:id="@+id/buttonCancelAddFolder"
@@ -156,7 +160,8 @@
                 android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="TextContrastCheck" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>

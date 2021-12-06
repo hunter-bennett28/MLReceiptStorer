@@ -1,4 +1,4 @@
-package com.example.hbennett.mlreceiptstorer.DB
+package com.example.hbennett.mlreceiptstorer.db
 
 import android.content.ContentValues
 import android.content.Context
@@ -14,20 +14,19 @@ import com.example.hbennett.mlreceiptstorer.dataclasses.Receipt
 import java.io.*
 import java.lang.Exception
 import java.time.LocalDate
-import java.util.*
 import kotlin.collections.ArrayList
 
 class DBAdapter : Closeable {
     companion object {
         const val SQL_CREATE_TABLE_FOLDER: String = "CREATE TABLE IF NOT EXISTS ${DBContract.Folder.TABLE_NAME} (" +
                     "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "${DBContract.Folder.COLUMN_NAME_ALIAS} TEXT UNIQUE);"
+                    "${DBContract.Folder.COLUMN_NAME_ALIAS} TEXT UNIQUE)"
         const val SQL_CREATE_TABLE_BUSINESS: String = "CREATE TABLE IF NOT EXISTS  ${DBContract.Business.TABLE_NAME} (" +
                     "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "${DBContract.Business.COLUMN_NAME_FOLDER_ID} INTEGER NOT NULL," + //FK
                     "${DBContract.Business.COLUMN_NAME_NAME} TEXT," +
                     "CONSTRAINT FK_FolderID FOREIGN KEY (${DBContract.Business.COLUMN_NAME_FOLDER_ID})" +
-                    "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}));"
+                    "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}))"
         const val SQL_CREATE_TABLE_RECEIPT: String = "CREATE TABLE IF NOT EXISTS ${DBContract.Receipt.TABLE_NAME} (" +
                     "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "${DBContract.Receipt.COLUMN_NAME_FOLDER_ID} INTEGER NOT NULL," + //FK
@@ -35,7 +34,7 @@ class DBAdapter : Closeable {
                     "${DBContract.Receipt.COLUMN_NAME_TOTAL} DOUBLE," +
                     "${DBContract.Receipt.COLUMN_NAME_DATE} TEXT," +
                     "CONSTRAINT FK_FolderID FOREIGN KEY (${DBContract.Receipt.COLUMN_NAME_FOLDER_ID}) " +
-                    "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}));"
+                    "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}))"
         const val TAG = "DBAdapter"
     }
 
@@ -80,9 +79,9 @@ class DBAdapter : Closeable {
                         + newVersion + ", which will destroy all old data"
             )
             db.execSQL(
-                "DROP TABLE IF EXISTS ${DBContract.Receipt.TABLE_NAME};" +
-                        "DROP TABLE IF EXISTS ${DBContract.Business.TABLE_NAME};" +
-                        "DROP TABLE IF EXISTS ${DBContract.Folder.TABLE_NAME};"
+                "DROP TABLE IF EXISTS ${DBContract.Receipt.TABLE_NAME}" +
+                        "DROP TABLE IF EXISTS ${DBContract.Business.TABLE_NAME}" +
+                        "DROP TABLE IF EXISTS ${DBContract.Folder.TABLE_NAME}"
             )
             onCreate(db)
         }
@@ -119,10 +118,10 @@ class DBAdapter : Closeable {
     fun insertFolder(alias: String?, business: List<String>): Long {
         val initialValues = ContentValues()
         initialValues.put(DBContract.Folder.COLUMN_NAME_ALIAS, alias)
-        var fid: Long = -1;
+        var fid: Long = -1
         //Initialize transaction
         try {
-            db!!.beginTransaction();
+            db!!.beginTransaction()
 
             fid = db!!.insert(DBContract.Folder.TABLE_NAME, null, initialValues)
 
@@ -134,12 +133,12 @@ class DBAdapter : Closeable {
                 db!!.insert(DBContract.Business.TABLE_NAME, null, initialValues)
             }
 
-            db!!.setTransactionSuccessful();
+            db!!.setTransactionSuccessful()
         } catch (e: Exception) {
-            e.printStackTrace();
+            e.printStackTrace()
         } finally {
-            db!!.endTransaction();
-            return fid;
+            db!!.endTransaction()
+            return fid
         }
     }
 
@@ -153,17 +152,17 @@ class DBAdapter : Closeable {
         initialValues.put(DBContract.Receipt.COLUMN_NAME_TOTAL, total)
         initialValues.put(DBContract.Receipt.COLUMN_NAME_DATE, LocalDate.now().toString())
 
-        return db!!.insert(DBContract.Receipt.TABLE_NAME, null, initialValues);
+        return db!!.insert(DBContract.Receipt.TABLE_NAME, null, initialValues)
     }
 
     /**
      * deleteFolder - deletes a folder, its receipts, and its businesses from the DB by a folder row id
      */
     fun deleteFolder(rowId: Long): Boolean {
-        var res: Boolean = false;
+        var res: Boolean = false
 
         try {
-            db!!.beginTransaction();
+            db!!.beginTransaction()
 
             res = db!!.delete(DBContract.Folder.TABLE_NAME, BaseColumns._ID + "=" + rowId, null) > 0
 
@@ -180,12 +179,12 @@ class DBAdapter : Closeable {
                 )
             }
 
-            db!!.setTransactionSuccessful();
+            db!!.setTransactionSuccessful()
         } catch (e: Exception) {
-            e.printStackTrace();
+            e.printStackTrace()
         } finally {
-            db!!.endTransaction();
-            return res;
+            db!!.endTransaction()
+            return res
         }
     }
 
@@ -208,7 +207,7 @@ class DBAdapter : Closeable {
         )
         if (cursor!!.moveToFirst()) {
             do {
-                folders.add(Folder(cursor.getLong(0), cursor.getString(1)));
+                folders.add(Folder(cursor.getLong(0), cursor.getString(1)))
             } while (cursor.moveToNext())
         }
         return folders
@@ -225,7 +224,7 @@ class DBAdapter : Closeable {
 
         if (cursor!!.moveToFirst()) {
             do {
-                businesses.add(Business(cursor.getLong(0), cursor.getLong(1), cursor.getString(2)));
+                businesses.add(Business(cursor.getLong(0), cursor.getLong(1), cursor.getString(2)))
             } while (cursor.moveToNext())
         }
         return businesses
@@ -244,7 +243,7 @@ class DBAdapter : Closeable {
             do {
                 receipts.add(Receipt(
                     cursor.getLong(0), cursor.getLong(1), cursor.getString(2), cursor.getDouble(3), cursor.getString(4)
-                ));
+                ))
             } while (cursor.moveToNext())
         }
         return receipts

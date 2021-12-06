@@ -28,9 +28,6 @@ class FolderRecyclerAdapter(
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.recycler_view_folder_layout, parent, false) as View
         // set the view's size, margins, paddings and layout parameters
-        val lp = view.layoutParams
-        lp.height = parent.measuredHeight / 10 //display 10 per screen
-        view.layoutParams = lp
         return ViewHolder(view)
     }
 
@@ -42,9 +39,9 @@ class FolderRecyclerAdapter(
         //Set on click for when the user interacts with a folder
         holder.view.findViewById<TextView>(R.id.textViewRecyclerViewFolderTitle)
             .setOnClickListener() {
-                val intent: Intent = Intent(context, FolderActivity::class.java);
-                intent.putExtra("id", folders[position].id);
-                intent.putExtra("folderName", folders[position].alias);
+                val intent: Intent = Intent(context, FolderActivity::class.java)
+                intent.putExtra("id", folders[position].id)
+                intent.putExtra("folderName", folders[position].alias)
                 context.startActivity(intent)
             }
     }

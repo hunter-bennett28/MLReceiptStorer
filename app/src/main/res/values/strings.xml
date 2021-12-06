@@ -22,4 +22,7 @@
     <string name="addFolderSuccess">Folder Created</string>
     <string name="addReceiptFailed">Save Receipt Failed</string>
     <string name="addReceiptSuccess">Receipt Saved</string>
+    <string name="savePhotoFailed">Failed To Save Photo</string>
+    <string name="folderHeaderDescription">Folder Topper</string>
+    <string name="receiptDescription">Saved Receipt</string>
 </resources>

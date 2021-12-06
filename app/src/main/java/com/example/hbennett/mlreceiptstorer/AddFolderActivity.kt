@@ -38,7 +38,7 @@ class AddFolderActivity : AppCompatActivity() {
         // Set up recycler view parts
         recyclerViewBusinessNames = findViewById(R.id.recyclerViewBusinessNames)
         viewManager = LinearLayoutManager(this)
-        viewAdapter = BusinessRecyclerAdapter(this, businessNames)
+        viewAdapter = BusinessRecyclerAdapter(businessNames)
         recyclerViewBusinessNames.apply {
             setHasFixedSize(true)
             layoutManager = viewManager
@@ -47,6 +47,7 @@ class AddFolderActivity : AppCompatActivity() {
         }
     }
 
+    // Add the input Business name to the list and RecyclerView
     fun onAddBusinessName(view: View) {
         val text = editTextBusinessName.text.toString().lowercase()
         if (text.isEmpty())
@@ -60,8 +61,10 @@ class AddFolderActivity : AppCompatActivity() {
         }
     }
 
+    // Return to MainActivity
     fun onCancel(view: View) = finish()
 
+    // Save the folder and its associated businesses the the DB and notify the MainActivity recycler
     fun onSaveFolder(view: View) {
         val folderName: String = editTextFolderName.text.toString()
         val result: Long = MainActivity.db.insertFolder(folderName, businessNames)
