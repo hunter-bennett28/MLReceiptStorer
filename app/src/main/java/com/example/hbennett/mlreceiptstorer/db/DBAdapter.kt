@@ -27,13 +27,13 @@ class DBAdapter : Closeable {
     companion object {
         const val SQL_CREATE_TABLE_FOLDER: String = "CREATE TABLE IF NOT EXISTS ${DBContract.Folder.TABLE_NAME} (" +
                     "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "${DBContract.Folder.COLUMN_NAME_ALIAS} TEXT UNIQUE)"
+                    "${DBContract.Folder.COLUMN_NAME_ALIAS} TEXT UNIQUE);"
         const val SQL_CREATE_TABLE_BUSINESS: String = "CREATE TABLE IF NOT EXISTS  ${DBContract.Business.TABLE_NAME} (" +
                     "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "${DBContract.Business.COLUMN_NAME_FOLDER_ID} INTEGER NOT NULL," + //FK
                     "${DBContract.Business.COLUMN_NAME_NAME} TEXT," +
                     "CONSTRAINT FK_FolderID FOREIGN KEY (${DBContract.Business.COLUMN_NAME_FOLDER_ID})" +
-                    "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}))"
+                    "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}));"
         const val SQL_CREATE_TABLE_RECEIPT: String = "CREATE TABLE IF NOT EXISTS ${DBContract.Receipt.TABLE_NAME} (" +
                     "${BaseColumns._ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "${DBContract.Receipt.COLUMN_NAME_FOLDER_ID} INTEGER NOT NULL," + //FK
@@ -41,7 +41,7 @@ class DBAdapter : Closeable {
                     "${DBContract.Receipt.COLUMN_NAME_TOTAL} DOUBLE," +
                     "${DBContract.Receipt.COLUMN_NAME_DATE} TEXT," +
                     "CONSTRAINT FK_FolderID FOREIGN KEY (${DBContract.Receipt.COLUMN_NAME_FOLDER_ID}) " +
-                    "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}))"
+                    "REFERENCES ${DBContract.Folder.TABLE_NAME}(${BaseColumns._ID}));"
         const val TAG = "DBAdapter"
     }
 
