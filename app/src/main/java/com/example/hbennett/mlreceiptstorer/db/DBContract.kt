@@ -1,13 +1,14 @@
 package com.example.hbennett.mlreceiptstorer.db
 
-import android.provider.BaseColumns
-
-/** DBContract.kt
+/**
+ * DBContract.kt
  * Connor Black, Hunter Bennett
  *
  * Implements a DB Contract that will be fulfilled by sqlite based on the documentation from:
  * https://developer.android.com/training/data-storage/sqlite#kotlin
  */
+
+import android.provider.BaseColumns
 
 object DBContract {
     //Tables are grouped together in objects

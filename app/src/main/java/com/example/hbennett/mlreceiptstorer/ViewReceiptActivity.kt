@@ -1,5 +1,12 @@
 package com.example.hbennett.mlreceiptstorer
 
+/**
+ * ViewReceiptActivity.kt
+ * Connor Black, Hunter Bennett
+ *
+ * Activity for viewing a receipt image
+ */
+
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -8,8 +15,8 @@ import android.provider.MediaStore
 import android.widget.ImageView
 
 class ViewReceiptActivity : AppCompatActivity() {
-
     lateinit var imageViewSavedReceipt: ImageView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_receipt)

@@ -1,5 +1,12 @@
 package com.example.hbennett.mlreceiptstorer
 
+/**
+ * ReceiptRecyclerAdapter.kt
+ * Connor Black, Hunter Bennett
+ *
+ * Adapter class for the receipt RecyclerView
+ */
+
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -18,8 +25,6 @@ class ReceiptRecyclerAdapter(
 
     // Provide a reference to the views for each data item
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view)
-
-    private val namesPerView = 15
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(

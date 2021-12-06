@@ -1,11 +1,17 @@
 package com.example.hbennett.mlreceiptstorer
 
+/**
+ * MainActivity.kt
+ * Connor Black, Hunter Bennett
+ *
+ * Main cctivity for viewing/creating folders and adding receipts
+ */
+
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
-
 import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.net.Uri
@@ -16,6 +22,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hbennett.mlreceiptstorer.db.DBAdapter
@@ -62,7 +69,7 @@ class MainActivity : AppCompatActivity() {
 
         // Show get started message if no folders created
         textViewGetStarted = findViewById(R.id.textViewGetStarted)
-        if (folders.size === 0)
+        if (folders.size == 0)
             textViewGetStarted.visibility = View.VISIBLE
 
         //Load recycler view from the folders
@@ -76,9 +83,27 @@ class MainActivity : AppCompatActivity() {
             adapter = viewAdapter
             addItemDecoration(DividerItemDecoration(this.context, DividerItemDecoration.VERTICAL))
         }
+
+        // Add swipe to delete functionality
+        val swipeHandler = object : SwipeToDeleteCallback() {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val pos = viewHolder.adapterPosition
+
+                if (db.deleteFolder(folders[pos].id!!)) {
+                    folders.removeAt(pos)
+                    viewAdapter.notifyItemRemoved(pos)
+                    if (folders.isEmpty())
+                        textViewGetStarted.visibility = View.VISIBLE
+                } else {
+                    Toast.makeText(baseContext, R.string.deleteFolderFailed, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+        val itemTouchHelper: ItemTouchHelper = ItemTouchHelper(swipeHandler)
+        itemTouchHelper.attachToRecyclerView(recyclerViewFolders)
     }
 
-    // Reload folders data on resume because other activites add folders
+    // Reload folder data on resume because other activities add folders
     override fun onResume() {
         super.onResume()
         // If there are folders, hide the get started message
@@ -92,15 +117,15 @@ class MainActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
             .setTitle(R.string.addReceipt)
             .setMessage(R.string.selectReceiptPrompt)
-            .setPositiveButton(R.string.takePhoto, DialogInterface.OnClickListener { dialog, id ->
+            .setPositiveButton(R.string.takePhoto, DialogInterface.OnClickListener { _, _ ->
                 onTakePhoto()
             })
             // use neutral as cancel because it is placed far left
-            .setNeutralButton(R.string.cancel, DialogInterface.OnClickListener { dialog, id ->
+            .setNeutralButton(R.string.cancel, DialogInterface.OnClickListener { dialog, _ ->
                 dialog.dismiss()
             })
             // use negative as affirmative option because it is placed center
-            .setNegativeButton(R.string.selectPhoto, DialogInterface.OnClickListener { dialog, id ->
+            .setNegativeButton(R.string.selectPhoto, DialogInterface.OnClickListener { _, _ ->
                 onSelectPhoto()
             })
 

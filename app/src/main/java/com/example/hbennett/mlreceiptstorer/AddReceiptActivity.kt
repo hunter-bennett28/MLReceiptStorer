@@ -1,5 +1,12 @@
 package com.example.hbennett.mlreceiptstorer
 
+/**
+ * AddReceiptActivity.kt
+ * Connor Black, Hunter Bennett
+ *
+ * Activity for adding receipts to folders
+ */
+
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -13,6 +20,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import java.lang.Integer.min
 import kotlin.math.round
 
 class AddReceiptActivity : AppCompatActivity() {
@@ -24,6 +32,7 @@ class AddReceiptActivity : AppCompatActivity() {
 
     // Misc
     lateinit var photoUriPath: String
+    lateinit var folderNames: ArrayList<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,29 +50,48 @@ class AddReceiptActivity : AppCompatActivity() {
         processImageText(imageBitMap)
 
         // Get folders
+        folderNames = ArrayList<String>()
+        getFolderList()
+        spinnerFolderSelect.setSelection(0)
+    }
+
+    // Gets the list of folders from the DB and extracts their names for use in the Spinner
+    private fun getFolderList() : ArrayList<String> {
+        // Get folders and names
         folders = MainActivity.db.getAllFolders()
-        val folderNames: ArrayList<String> = ArrayList()
+        folderNames.clear()
+        folderNames.add(getString(R.string.selectFolder))
         for (f in folders)
             folderNames.add(f.alias)
 
+        // Set up adapter
         var adapter: ArrayAdapter<String> =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, folderNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
         spinnerFolderSelect.adapter = adapter
-        spinnerFolderSelect.setSelection(0)
+
+        return folderNames
+    }
+
+    // Updates data on resuming, setting folder selection to newly added Folder if coming from AddFolderActivity
+    override fun onResume() {
+        super.onResume()
+        val totalFolders: Int = folderNames.size
+        getFolderList()
+        if (folderNames.size > totalFolders)
+            spinnerFolderSelect.setSelection(folderNames.size - 1)
     }
 
     // Sets up OCR recognizer and extracts text
     private fun processImageText(imageBitMap: Bitmap?) {
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-        val image = InputImage.fromBitmap(imageBitMap, 0)
+        val image = InputImage.fromBitmap(imageBitMap!!, 0)
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
                 getReceiptTotal(visionText)
                 getFolderRecommendation(visionText)
             }
-            .addOnFailureListener { e ->
+            .addOnFailureListener { _ ->
                 Toast.makeText(this, R.string.parseFailed, Toast.LENGTH_LONG).show()
             }
     }
@@ -129,12 +157,12 @@ class AddReceiptActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<Spinner>(R.id.spinnerFolderSelect).setSelection(closestFolderIndex)
+        spinnerFolderSelect.setSelection(min(closestFolderIndex + 1, folderNames.size - 1))
     }
 
     // Implementation of the Levenshtein Edit Distance
     // See http://rosettacode.org/wiki/Levenshtein_distance#Java
-    fun editDistance(str1: String, str2: String): Int {
+    private fun editDistance(str1: String, str2: String): Int {
         var s1 = str1.lowercase()
         var s2 = str2.lowercase()
         val costs = IntArray(s2.length + 1)
@@ -160,6 +188,12 @@ class AddReceiptActivity : AppCompatActivity() {
 
     // Saves the receipt to the DB
     fun onSaveReceipt(view: View) {
+        // Ensure folder selected
+        if (spinnerFolderSelect.selectedItemPosition == 0) {
+            Toast.makeText(this, R.string.selectFolderError, Toast.LENGTH_LONG).show()
+            return
+        }
+
         // Parse values
         val selectedFolder: String = spinnerFolderSelect.selectedItem.toString()
         val fid: Long = folders.find { it.alias === selectedFolder }?.id as Long

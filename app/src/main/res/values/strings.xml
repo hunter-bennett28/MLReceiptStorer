@@ -25,4 +25,7 @@
     <string name="savePhotoFailed">Failed To Save Photo</string>
     <string name="folderHeaderDescription">Folder Topper</string>
     <string name="receiptDescription">Saved Receipt</string>
+    <string name="deleteFolderFailed">Could Not Delete Folder</string>
+    <string name="selectFolder">- Select Folder -</string>
+    <string name="selectFolderError">Please Select A Folder</string>
 </resources>
