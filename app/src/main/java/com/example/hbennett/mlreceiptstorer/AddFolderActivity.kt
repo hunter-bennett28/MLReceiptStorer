@@ -85,6 +85,11 @@ class AddFolderActivity : AppCompatActivity() {
 
     // Save the folder and its associated businesses the the DB and notify the MainActivity recycler
     fun onSaveFolder(view: View) {
+        if(businessNames.isEmpty() && editTextFolderName.text.isEmpty()){
+            Toast.makeText(this,R.string.folderAddFail, Toast.LENGTH_LONG).show();
+            return
+        }
+
         val folderName: String = editTextFolderName.text.toString()
         val result: Long = MainActivity.db.insertFolder(folderName, businessNames)
         if (result < 1L)

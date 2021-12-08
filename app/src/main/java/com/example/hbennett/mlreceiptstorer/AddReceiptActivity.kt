@@ -104,7 +104,7 @@ class AddReceiptActivity : AppCompatActivity() {
         var totalFound: Boolean = false
         var total: String = "0.0"
 
-        // Get either the last money value or the one immediately after finding "total"
+        // Get either tfhe last money value or the one immediately after finding "total"
         for (block in visionText.textBlocks) {
             var text = block.text
             if (moneyRegex.matches(text)) {
@@ -194,6 +194,12 @@ class AddReceiptActivity : AppCompatActivity() {
             return
         }
 
+        //Check that a total is greater than 0
+        if(editTextReceiptTotal.text.toString().toDouble() < 0.0){
+            Toast.makeText(this, R.string.receiptTotalError, Toast.LENGTH_LONG).show()
+            return
+        }
+
         // Parse values
         val selectedFolder: String = spinnerFolderSelect.selectedItem.toString()
         val fid: Long = folders.find { it.alias === selectedFolder }?.id as Long
@@ -215,6 +221,13 @@ class AddReceiptActivity : AppCompatActivity() {
     // Launches the AddFolder activity
     fun onAddFolder(view: View) {
         val intent: Intent = Intent(this, AddFolderActivity::class.java)
+        startActivity(intent)
+    }
+
+    //Opens the receipt image in a new activity for viewing
+    fun onViewReceipt(view: View) {
+        val intent: Intent = Intent(this, ViewReceiptActivity::class.java)
+        intent.putExtra("image", photoUriPath)
         startActivity(intent)
     }
 }
