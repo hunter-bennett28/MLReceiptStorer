@@ -88,8 +88,10 @@ class AddReceiptActivity : AppCompatActivity() {
         val image = InputImage.fromBitmap(imageBitMap!!, 0)
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
-                getReceiptTotal(visionText)
-                getFolderRecommendation(visionText)
+                if (visionText.text.isNotEmpty()) {
+                    getReceiptTotal(visionText)
+                    getFolderRecommendation(visionText)
+                }
             }
             .addOnFailureListener { _ ->
                 Toast.makeText(this, R.string.parseFailed, Toast.LENGTH_LONG).show()
@@ -135,6 +137,8 @@ class AddReceiptActivity : AppCompatActivity() {
 
         folders.forEachIndexed { index, f ->
             val businessNames = MainActivity.db.getBusinesses(f.id!!)
+            if (businessNames.isEmpty())
+                return
 
             //Get closest distance over all business names for the folder
             var distance: Int? = null
@@ -147,7 +151,7 @@ class AddReceiptActivity : AppCompatActivity() {
                     distance = bNDistance
             }
 
-            //check the folder's closes distance against the current closest
+            //check the folder's closest distance against the current closest
             if (closestDistance == null) {
                 closestDistance = distance
                 closestFolderIndex = index
@@ -221,13 +225,6 @@ class AddReceiptActivity : AppCompatActivity() {
     // Launches the AddFolder activity
     fun onAddFolder(view: View) {
         val intent: Intent = Intent(this, AddFolderActivity::class.java)
-        startActivity(intent)
-    }
-
-    //Opens the receipt image in a new activity for viewing
-    fun onViewReceipt(view: View) {
-        val intent: Intent = Intent(this, ViewReceiptActivity::class.java)
-        intent.putExtra("image", photoUriPath)
         startActivity(intent)
     }
 }

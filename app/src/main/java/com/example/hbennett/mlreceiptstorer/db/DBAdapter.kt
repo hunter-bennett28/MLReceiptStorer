@@ -46,13 +46,13 @@ class DBAdapter : Closeable {
     }
 
     var context: Context? = null
-    var DBHelper: DatabaseHelper? = null
+    var dbHelper: DatabaseHelper? = null
     var db: SQLiteDatabase? = null
     val packageName = "com.example.hbennett.mlreceiptstorer"
 
     constructor(ctx: Context?, baseContext: Context) {
         context = ctx
-        DBHelper = DatabaseHelper(context)
+        dbHelper = DatabaseHelper(context)
         //create a database if it doesnt exist already in the file path
         val destPath = "data/data/$packageName/databases"
         val f = File(destPath)
@@ -113,13 +113,13 @@ class DBAdapter : Closeable {
     // opens the database
     @Throws(SQLException::class)
     private fun openDB(): DBAdapter? {
-        db = DBHelper!!.writableDatabase
+        db = dbHelper!!.writableDatabase
         return this
     }
 
     // closes the database
     private fun closeDB() {
-        DBHelper!!.close()
+        dbHelper!!.close()
     }
 
     /**

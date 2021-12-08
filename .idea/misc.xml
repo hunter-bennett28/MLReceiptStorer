@@ -5,16 +5,20 @@
       <map>
         <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
         <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/drawable/rounded_button.xml" value="0.1" />
+        <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout-land/activity_add_folder.xml" value="0.428125" />
+        <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout-land/activity_add_receipt.xml" value="0.428125" />
+        <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/activity_add_folder.xml" value="0.33" />
         <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/activity_add_receipt.xml" value="0.36666666666666664" />
+        <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/activity_folder.xml" value="0.30052083333333335" />
         <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/activity_view_receipt.xml" value="0.36666666666666664" />
         <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/fragment_add_receipt_dialog.xml" value="0.20205128205128206" />
-        <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout-land/activity_add_receipt.xml" value="0.25" />
-        <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/activity_add_folder.xml" value="0.36666666666666664" />
-        <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/activity_add_receipt.xml" value="0.5" />
+        <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/recycler_view_business_names_layout.xml" value="0.30052083333333335" />
+        <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/recycler_view_folder_layout.xml" value="0.30052083333333335" />
+        <entry key="..\:/Mega/Workspaces/AndroidStudio/MLReceiptStorer/app/src/main/res/layout/recycler_view_receipt_layout.xml" value="0.30052083333333335" />
+        <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/activity_add_receipt.xml" value="0.20520833333333333" />
         <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/activity_folder.xml" value="0.25" />
         <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/activity_main.xml" value="0.30303030303030304" />
-        <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/activity_reciept.xml" value="0.36666666666666664" />
-        <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/activity_view_receipt.xml" value="0.25" />
         <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/recycler_view_business_names_layout.xml" value="0.1375" />
         <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/recycler_view_folder_layout.xml" value="0.2015625" />
         <entry key="..\:/Users/conni/Desktop/Term 6/Mobile Development Adv/Mobile Project/app/src/main/res/layout/recycler_view_receipt_layout.xml" value="0.5" />
@@ -22,17 +26,10 @@
     </option>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_15" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
-  </component>
-  <component name="VisualizationToolProject">
-    <option name="state">
-      <ProjectState>
-        <option name="scale" value="0.5" />
-      </ProjectState>
-    </option>
   </component>
 </project>
