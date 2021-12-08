@@ -85,7 +85,7 @@ class AddReceiptActivity : AppCompatActivity() {
     // Sets up OCR recognizer and extracts text
     private fun processImageText(imageBitMap: Bitmap?) {
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-        val image = InputImage.fromBitmap(imageBitMap!!,  0)
+        val image = InputImage.fromBitmap(imageBitMap!!, 0)
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
                 getReceiptTotal(visionText)
@@ -104,7 +104,7 @@ class AddReceiptActivity : AppCompatActivity() {
         var totalFound: Boolean = false
         var total: String = "0.0"
 
-        // Get either the last money value or the one immediately after finding "total"
+        // Get either tfhe last money value or the one immediately after finding "total"
         for (block in visionText.textBlocks) {
             var text = block.text
             if (moneyRegex.matches(text)) {
@@ -195,7 +195,7 @@ class AddReceiptActivity : AppCompatActivity() {
         }
 
         //Check that a total is greater than 0
-        if(editTextReceiptTotal.text.toString().toDouble() <= 0.0){
+        if(editTextReceiptTotal.text.toString().toDouble() < 0.0){
             Toast.makeText(this, R.string.receiptTotalError, Toast.LENGTH_LONG).show()
             return
         }
@@ -224,6 +224,7 @@ class AddReceiptActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    //Opens the receipt image in a new activity for viewing
     fun onViewReceipt(view: View) {
         val intent: Intent = Intent(this, ViewReceiptActivity::class.java)
         intent.putExtra("image", photoUriPath)

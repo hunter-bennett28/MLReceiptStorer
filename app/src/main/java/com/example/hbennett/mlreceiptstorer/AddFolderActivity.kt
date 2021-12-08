@@ -87,9 +87,8 @@ class AddFolderActivity : AppCompatActivity() {
     fun onSaveFolder(view: View) {
         if(businessNames.isEmpty() && editTextFolderName.text.isEmpty()){
             Toast.makeText(this,R.string.folderAddFail, Toast.LENGTH_LONG).show();
-            return;
+            return
         }
-
 
         val folderName: String = editTextFolderName.text.toString()
         val result: Long = MainActivity.db.insertFolder(folderName, businessNames)
