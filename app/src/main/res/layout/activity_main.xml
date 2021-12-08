@@ -56,6 +56,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginEnd="-4dp"
         android:contentDescription="@string/folderHeaderDescription"
+        android:scaleType="fitXY"
         android:translationZ="-100sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.428"

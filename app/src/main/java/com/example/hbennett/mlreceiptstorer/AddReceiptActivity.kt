@@ -85,7 +85,7 @@ class AddReceiptActivity : AppCompatActivity() {
     // Sets up OCR recognizer and extracts text
     private fun processImageText(imageBitMap: Bitmap?) {
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-        val image = InputImage.fromBitmap(imageBitMap!!, 0)
+        val image = InputImage.fromBitmap(imageBitMap!!,  0)
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
                 getReceiptTotal(visionText)
@@ -194,6 +194,12 @@ class AddReceiptActivity : AppCompatActivity() {
             return
         }
 
+        //Check that a total is greater than 0
+        if(editTextReceiptTotal.text.toString().toDouble() <= 0.0){
+            Toast.makeText(this, R.string.receiptTotalError, Toast.LENGTH_LONG).show()
+            return
+        }
+
         // Parse values
         val selectedFolder: String = spinnerFolderSelect.selectedItem.toString()
         val fid: Long = folders.find { it.alias === selectedFolder }?.id as Long
@@ -215,6 +221,12 @@ class AddReceiptActivity : AppCompatActivity() {
     // Launches the AddFolder activity
     fun onAddFolder(view: View) {
         val intent: Intent = Intent(this, AddFolderActivity::class.java)
+        startActivity(intent)
+    }
+
+    fun onViewReceipt(view: View) {
+        val intent: Intent = Intent(this, ViewReceiptActivity::class.java)
+        intent.putExtra("image", photoUriPath)
         startActivity(intent)
     }
 }

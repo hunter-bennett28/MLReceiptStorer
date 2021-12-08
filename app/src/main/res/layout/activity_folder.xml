@@ -67,6 +67,7 @@
         android:layout_marginStart="-4dp"
         android:contentDescription="@string/folderHeaderDescription"
         android:rotationY="180"
+        android:scaleType="fitXY"
         android:translationZ="-100sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

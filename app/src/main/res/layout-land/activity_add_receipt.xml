@@ -10,9 +10,9 @@
         android:id="@+id/buttonAddBusinessName2"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="149dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="150dp"
         android:background="@drawable/rounded_button"
         android:backgroundTint="@color/baby_blue"
         android:onClick="onAddFolder"
@@ -48,6 +48,18 @@
         app:layout_constraintBottom_toTopOf="@+id/textViewTotalTitle"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <TextView
+        android:id="@+id/textViewTotalTitle"
+        android:layout_width="70dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginBottom="100dp"
+        android:fontFamily="@font/alegreya_sc"
+        android:text="@string/total"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <ImageView
         android:id="@+id/imageViewReceiptAdd"
         android:layout_width="0dp"
@@ -60,19 +72,8 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewAddReceipt"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <TextView
-        android:id="@+id/textViewTotalTitle"
-        android:layout_width="70dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginBottom="100dp"
-        android:fontFamily="@font/alegreya_sc"
-        android:text="@string/total"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintVertical_bias="0.0"
+        android:visibility="invisible"/>
 
     <EditText
         android:id="@+id/editTextReceiptTotal"
@@ -94,9 +95,10 @@
         android:id="@+id/buttonSaveReceipt"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="64dp"
+        android:layout_marginBottom="25dp"
         android:background="@color/baby_blue"
         android:fontFamily="@font/alegreya_sc"
         android:onClick="onSaveReceipt"
@@ -104,7 +106,29 @@
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/buttonViewReceipt"
+        app:layout_constraintTop_toBottomOf="@+id/editTextReceiptTotal"
+        tools:ignore="TextContrastCheck" />
+
+    <Button
+        android:id="@+id/buttonViewReceipt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="25dp"
+        android:background="@color/baby_blue"
+        android:fontFamily="@font/alegreya_sc"
+        android:onClick="onViewReceipt"
+        android:text="@string/viewReceipt"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/buttonSaveReceipt"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextReceiptTotal"
         tools:ignore="TextContrastCheck" />
